@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.biketracker.databinding.FragmentSettingsBinding;
+
 public class SettingsFragment extends Fragment {
 
     private FragmentSettingsBinding binding;
@@ -22,7 +24,7 @@ public class SettingsFragment extends Fragment {
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textGallery;
+        final TextView textView = binding.textSettings;
         galleryViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }

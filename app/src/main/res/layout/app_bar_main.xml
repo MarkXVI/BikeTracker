@@ -30,7 +30,8 @@
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="16dp"
         android:contentDescription="@string/about_me"
-        app:srcCompat="@drawable/ic_question"
+        app:fabSize="auto"
+        app:srcCompat="@android:drawable/ic_input_add"
         tools:ignore="SpeakableTextPresentCheck, ImageContrastCheck" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,7 +1,6 @@
 package com.example.biketracker;
 
 import android.os.Bundle;
-import android.view.Menu;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
@@ -13,7 +12,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.navdrawer.databinding.ActivityMainBinding;
+import com.example.biketracker.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,11 +40,11 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navigationView, navController);
     }
 
-    @Override
+/*  @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
-    }
+    }*/
 
     @Override
     public boolean onSupportNavigateUp() {

@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_login">
 
     <fragment
-        android:id="@+id/nav_home"
+        android:id="@+id/nav_login"
         android:name="com.example.biketracker.ui.login.LoginFragment"
         android:label="@string/menu_1"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_login" />
 
     <fragment
-        android:id="@+id/nav_gallery"
+        android:id="@+id/nav_map"
         android:name="com.example.biketracker.ui.map.MapFragment"
         android:label="@string/menu_2"
-        tools:layout="@layout/fragment_gallery" />
+        tools:layout="@layout/fragment_map" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
+        android:id="@+id/nav_settings"
         android:name="com.example.biketracker.ui.settings.SettingsFragment"
         android:label="@string/menu_3"
-        tools:layout="@layout/fragment_slideshow" />
+        tools:layout="@layout/fragment_settings" />
 </navigation>

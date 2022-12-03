@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">BikeTracker</string>
+
+    <string name="menu_1">Login</string>
+    <string name="menu_2">Map</string>
+    <string name="menu_3">Settings</string>
+    <string name="about_me">About Me</string>
 </resources>

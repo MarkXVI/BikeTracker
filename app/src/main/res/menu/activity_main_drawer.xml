@@ -8,15 +8,15 @@
         android:checkableBehavior="single"
         android:title="@string/app_name" >
         <item
-            android:id="@+id/nav_home"
+            android:id="@+id/nav_login"
             android:icon="@drawable/ic_menu_camera"
             android:title="@string/menu_1" />
         <item
-            android:id="@+id/nav_gallery"
+            android:id="@+id/nav_map"
             android:icon="@drawable/ic_pancakes"
             android:title="@string/menu_2" />
         <item
-            android:id="@+id/nav_slideshow"
+            android:id="@+id/nav_settings"
             android:icon="@drawable/ic_split"
             android:title="@string/menu_3" />
     </group>

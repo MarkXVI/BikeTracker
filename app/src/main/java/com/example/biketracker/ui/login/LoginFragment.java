@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.navdrawer.databinding.FragmentGalleryBinding;
+import com.example.biketracker.databinding.FragmentLoginBinding;
 
 public class LoginFragment extends Fragment {
 
@@ -24,7 +24,7 @@ public class LoginFragment extends Fragment {
         binding = FragmentLoginBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textGallery;
+        final TextView textView = binding.textLogin;
         galleryViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }
