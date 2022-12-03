@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view"
+    android:background="@drawable/side_nav_bar">
+
+    <group
+        android:checkableBehavior="single"
+        android:title="@string/app_name" >
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="@string/menu_1" />
+        <item
+            android:id="@+id/nav_gallery"
+            android:icon="@drawable/ic_pancakes"
+            android:title="@string/menu_2" />
+        <item
+            android:id="@+id/nav_slideshow"
+            android:icon="@drawable/ic_split"
+            android:title="@string/menu_3" />
+    </group>
+</menu>
