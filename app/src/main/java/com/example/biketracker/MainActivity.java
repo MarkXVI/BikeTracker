@@ -2,6 +2,8 @@ package com.example.biketracker;
 
 import android.os.Bundle;
 
+import com.example.biketracker.databinding.ActivityMainBinding;
+
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
@@ -11,8 +13,6 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.example.biketracker.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -9,15 +9,15 @@
         android:title="@string/app_name" >
         <item
             android:id="@+id/nav_login"
-            android:icon="@drawable/ic_menu_camera"
+            android:icon="@drawable/ic_question"
             android:title="@string/menu_1" />
         <item
             android:id="@+id/nav_map"
-            android:icon="@drawable/ic_pancakes"
+            android:icon="@drawable/ic_question"
             android:title="@string/menu_2" />
         <item
             android:id="@+id/nav_settings"
-            android:icon="@drawable/ic_split"
+            android:icon="@drawable/ic_question"
             android:title="@string/menu_3" />
     </group>
 </menu>
