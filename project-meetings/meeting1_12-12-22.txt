@@ -1,0 +1,20 @@
+2 DBS
+1 that picks up sensors (yggio)
+
+jan has ordered 2 sensors and is going to connect to db1
+gdpr
+
+db2 ?
+
+our db for data visualisation
+not showing parked bikes
+how can we visualize where bikes are going
+
+app - could (if moving) && user presses is stolen -> show visualisation
+
+visualize in eVillage
+
+bankID?
+
+Swedish app primarily
+
