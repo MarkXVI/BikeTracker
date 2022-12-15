@@ -3,23 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_login">
-
-    <fragment
-        android:id="@+id/nav_login"
-        android:name="com.example.biketracker.ui.login.LoginFragment"
-        android:label="@string/menu_1"
-        tools:layout="@layout/fragment_login" />
+    app:startDestination="@id/nav_map">
 
     <fragment
         android:id="@+id/nav_map"
         android:name="com.example.biketracker.ui.map.MapFragment"
-        android:label="@string/menu_2"
+        android:label="@string/map"
         tools:layout="@layout/fragment_map" />
 
     <fragment
         android:id="@+id/nav_settings"
         android:name="com.example.biketracker.ui.settings.SettingsFragment"
-        android:label="@string/menu_3"
+        android:label="@string/settings"
         tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/nav_notification_settings"
+        android:name="com.example.biketracker.ui.settings.SettingsFragment"
+        android:label="@string/notification_settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/nav_account_settings"
+        android:name="com.example.biketracker.ui.settings.SettingsFragment"
+        android:label="@string/account_settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/nav_login"
+        android:name="com.example.biketracker.ui.login.LoginFragment"
+        android:label="@string/login"
+        tools:layout="@layout/fragment_login"/>
 </navigation>
