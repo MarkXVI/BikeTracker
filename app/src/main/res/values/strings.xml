@@ -1,8 +1,14 @@
 <resources>
     <string name="app_name">BikeTracker</string>
-
     <string name="menu_1">Login</string>
     <string name="menu_2">Map</string>
     <string name="menu_3">Settings</string>
     <string name="about_me">About Me</string>
+
+    <!--Login Fragment-->
+    <string name="loginPassword">Password</string>
+    <string name="loginEmail">Email</string>
+    <string name="buttonLogin">Login</string>
+    <string name="buttonCreateAccount">Create Account</string>
+    <string name="textViewForgotPassword">Forgot your password?</string>
 </resources>
