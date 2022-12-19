@@ -31,6 +31,7 @@ public class Connect {
     MongoClient mongoClient;
     MongoDatabase mongoDatabase;
     CodecRegistry pojoCodecRegistry;
+    Document queryFilter;
 
     public void Initialize(){
         String appID = AppId;
@@ -62,7 +63,7 @@ public class Connect {
 
 
 
-    public void Create(EditText name, EditText email, EditText password){
+    public void create(EditText name, EditText email, EditText password){
         BikeUser bikeUser = new BikeUser(
                 new ObjectId(),
                 name.getText().toString(),
@@ -79,8 +80,8 @@ public class Connect {
 
     }
 
-    public void Read(){
-        Document queryFilter  = new Document("name", "Trump");
+    public void read(){
+        queryFilter  = new Document("name", "Trump");
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
                 BikeUser result = task.get();
@@ -92,11 +93,39 @@ public class Connect {
 
     }
 
-    public void Update(){
+    public void update(){
+        queryFilter = new Document("name", "petunia");
+        Document updateDocument = new Document("$set", new Document("sunlight", "partial"));
+        mongoCollection.updateOne(queryFilter, updateDocument).getAsync(task -> {
+            if (task.isSuccess()) {
+                long count = task.get().getModifiedCount();
+                if (count == 1) {
+                    Log.v("EXAMPLE", "successfully updated a document.");
+                } else {
+                    Log.v("EXAMPLE", "did not update a document.");
+                }
+            } else {
+                Log.e("EXAMPLE", "failed to update document with: ", task.getError());
+            }
+        });
 
     }
 
-    public void Delete(){
+    public void delete(){
+        queryFilter = new Document("color", "green");
+        mongoCollection.deleteOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) {
+                long count = task.get().getDeletedCount();
+                if (count == 1) {
+                    Log.v("EXAMPLE", "successfully deleted a document.");
+                } else {
+                    Log.v("EXAMPLE", "did not delete a document.");
+                }
+            } else {
+                Log.e("EXAMPLE", "failed to delete document with: ", task.getError());
+            }
+        });
+
 
     }
 }
