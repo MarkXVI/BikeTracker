@@ -1,37 +1,39 @@
 package com.example.biketracker.ui.login;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Button;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.fragment.app.FragmentManager;
 
-import com.example.biketracker.databinding.FragmentLoginBinding;
+import com.example.biketracker.MainActivity;
+import com.example.biketracker.R;
 
 public class LoginFragment extends Fragment {
 
-    private FragmentLoginBinding binding;
-
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        LoginViewModel galleryViewModel =
-                new ViewModelProvider(this).get(LoginViewModel.class);
-
-        binding = FragmentLoginBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
-
-        final TextView textView = binding.textLogin;
-        galleryViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-        return root;
-    }
-
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_login, container, false);
+        Button btnRegister = rootView.findViewById(R.id.buttonCreateAccount);
+
+        btnRegister.setOnClickListener(view -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerView, RegisterFragment.class, null)
+                    .setReorderingAllowed(true)
+                    .addToBackStack("name")
+                    .commit();
+        });
+
+        Button btnLogin = rootView.findViewById(R.id.buttonLogin);
+        btnLogin.setOnClickListener(view -> {
+            Intent intent = new Intent(getActivity(), MainActivity.class);
+            startActivity(intent);
+        });
+        return rootView;
     }
 }
