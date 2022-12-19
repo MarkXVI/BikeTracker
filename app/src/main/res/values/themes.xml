@@ -19,7 +19,7 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.NavDrawer.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.NavDrawer.AppBarOverlay" parent="Theme.BikeTracker.NoActionBar" />
 
-    <style name="Theme.NavDrawer.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.NavDrawer.PopupOverlay" parent="Theme.BikeTracker.NoActionBar" />
 </resources>

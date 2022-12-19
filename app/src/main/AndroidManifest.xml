@@ -21,9 +21,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_smarta_byar"
+        android:icon="@mipmap/ic_bike_tracker_logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_smarta_byar_round"
+        android:roundIcon="@mipmap/ic_bike_tracker_logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BikeTracker"
         tools:targetApi="31">
