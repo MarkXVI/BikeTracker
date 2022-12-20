@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
-
+apply plugin: "realm-android"
 android {
     namespace 'com.example.biketracker'
     compileSdk 33
@@ -32,6 +32,10 @@ android {
     }
 }
 
+realm {
+    syncEnabled = true
+}
+
 dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.5.1'
@@ -39,6 +43,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.navigation:navigation-fragment:2.5.3'
     implementation 'androidx.navigation:navigation-ui:2.5.3'
+    implementation 'io.realm:realm-gradle-plugin:10.10.1'
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
