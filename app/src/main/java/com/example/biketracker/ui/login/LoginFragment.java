@@ -13,11 +13,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.biketracker.Connect;
-import com.example.biketracker.LoginActivity;
 import com.example.biketracker.MainActivity;
 import com.example.biketracker.R;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class LoginFragment extends Fragment {
 
@@ -37,8 +34,8 @@ public class LoginFragment extends Fragment {
 
         Button btnLogin = rootView.findViewById(R.id.buttonLogin);
         btnLogin.setOnClickListener(view -> {
-            EditText email = rootView.findViewById(R.id.editTextEmailAddress);
-            EditText password = rootView.findViewById(R.id.editTextPassword);
+            EditText email = rootView.findViewById(R.id.editTextLoginEmail);
+            EditText password = rootView.findViewById(R.id.editTextLoginPassword);
             Connect connect = new Connect();
             connect.initialize();
             connect.read(email.getText().toString(), password.getText().toString(), check -> {
@@ -62,10 +59,5 @@ public class LoginFragment extends Fragment {
             });
         });
         return rootView;
-    }
-
-    public void switchToMainActivity() {
-        Intent intent = new Intent(getActivity(), MainActivity.class);
-        startActivity(intent);
     }
 }
