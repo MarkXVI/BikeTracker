@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.EditText;
 
+import androidx.core.util.Consumer;
 import androidx.fragment.app.Fragment;
 
 import com.example.biketracker.ui.login.LoginFragment;
@@ -74,8 +75,6 @@ public class Connect {
 
     }
 
-
-
     public void create(EditText name, EditText email, EditText password){
         BikeUser bikeUser = new BikeUser(
                 new ObjectId(),
@@ -89,31 +88,24 @@ public class Connect {
                 Log.e("EXAMPLE", "failed to insert documents with: " + task.getError().getErrorMessage());
             }
         });
-
-
     }
 
-
-    public int read(String email, String password) throws InterruptedException {
+    public void read(String email, String password, Consumer<AtomicInteger> callback) {
         queryFilter = new Document("email", email);
         AtomicInteger check = new AtomicInteger(0);
-
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
                 BikeUser result = task.get();
-                check.set(1);
-                Log.v("EXAMPLE", "successfully found a document: " + result);
-                if (Objects.equals(result.getPassword(), password)) {
-                    check.set(2);
-                }
+                if (result == null) check.set(1);
+                else if (!Objects.equals(result.getPassword(), password)) check.set(2);
+                else Log.v("EXAMPLE", "successfully found a document: " + result);
             } else {
+                check.set(3);
                 Log.e("EXAMPLE", "failed to find document with: ", task.getError());
             }
+            callback.accept(check);
         });
-
-        return check.get();
     }
-
 
     public void update(){
         queryFilter = new Document("name", "petunia");

@@ -19,8 +19,6 @@ import com.example.biketracker.R;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.realm.Realm;
-
 public class LoginFragment extends Fragment {
 
     @Override
@@ -43,32 +41,25 @@ public class LoginFragment extends Fragment {
             EditText password = rootView.findViewById(R.id.editTextPassword);
             Connect connect = new Connect();
             connect.initialize();
+            connect.read(email.getText().toString(), password.getText().toString(), check -> {
 
-            AtomicInteger check = new AtomicInteger(0);
-            try {
-                check.set(connect.read(email.getText().toString(), password.getText().toString()));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            String LOG_TAG = LoginActivity.class.getSimpleName();
-
-            switch (check.get()) {
-                case 0:
-                    Log.d(LOG_TAG, "wrong email");
-                    //wrong email
-                    break;
-                case 1:
-                    Log.d(LOG_TAG, "wrong password");
-                    //wrong password;
-                    break;
-                case 2:
-                    //success
-                    Intent intent = new Intent(getActivity(), MainActivity.class);
-                    startActivity(intent);
-                default:
-                    //error
-            }
+                switch (check.get()) {
+                    case 0:
+                        Log.e("EXAMPLE", "Success");
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        startActivity(intent);
+                        break;
+                    case 1:
+                        Log.e("EXAMPLE", "Wrong email");
+                        break;
+                    case 2:
+                        Log.e("EXAMPLE", "Wrong password");
+                        break;
+                    default:
+                        Log.e("EXAMPLE", "Error");
+                        break;
+                }
+            });
         });
         return rootView;
     }
