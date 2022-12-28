@@ -3,14 +3,27 @@ package com.example.biketracker;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
+
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.EditText;
+
+import androidx.fragment.app.Fragment;
+
+import com.example.biketracker.ui.login.LoginFragment;
+
 
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
 
+
+import java.net.URL;
+import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.realm.mongodb.App;
@@ -80,18 +93,27 @@ public class Connect {
 
     }
 
-    public void read(){
-        queryFilter  = new Document("name", "Trump");
+
+    public int read(String email, String password) throws InterruptedException {
+        queryFilter = new Document("email", email);
+        AtomicInteger check = new AtomicInteger(0);
+
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
                 BikeUser result = task.get();
+                check.set(1);
                 Log.v("EXAMPLE", "successfully found a document: " + result);
+                if (Objects.equals(result.getPassword(), password)) {
+                    check.set(2);
+                }
             } else {
                 Log.e("EXAMPLE", "failed to find document with: ", task.getError());
             }
         });
 
+        return check.get();
     }
+
 
     public void update(){
         queryFilter = new Document("name", "petunia");
