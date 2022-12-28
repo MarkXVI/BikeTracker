@@ -3,26 +3,16 @@ package com.example.biketracker;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
-
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.EditText;
 
-import androidx.fragment.app.Fragment;
-
-import com.example.biketracker.ui.login.LoginFragment;
-
+import androidx.core.util.Consumer;
 
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
 
-
-import java.net.URL;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -71,49 +61,38 @@ public class Connect {
                 BikeUser.class).withCodecRegistry(pojoCodecRegistry);
 
         Log.v("EXAMPLE", "Successfully instantiated the MongoDB collection handle");
-
     }
 
-
-
-    public void create(EditText name, EditText email, EditText password){
-        BikeUser bikeUser = new BikeUser(
-                new ObjectId(),
-                name.getText().toString(),
-                email.getText().toString(),
-                password.getText().toString());
+    public void create(String name, String email, String password, Consumer<AtomicInteger> callback) {
+        AtomicInteger check = new AtomicInteger(0);
+        BikeUser bikeUser = new BikeUser(new ObjectId(), name, email, password);
         mongoCollection.insertOne(bikeUser).getAsync(task -> {
             if (task.isSuccess()) {
+                check.set(1);
                 Log.v("EXAMPLE", "successfully inserted a document with id: " + task.get().getInsertedId());
             } else {
                 Log.e("EXAMPLE", "failed to insert documents with: " + task.getError().getErrorMessage());
             }
+            callback.accept(check);
         });
-
-
     }
 
-
-    public int read(String email, String password) throws InterruptedException {
-        queryFilter = new Document("email", email);
+    public void read(String email, String password, Consumer<AtomicInteger> callback) {
         AtomicInteger check = new AtomicInteger(0);
-
+        queryFilter = new Document("email", email);
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
                 BikeUser result = task.get();
-                check.set(1);
-                Log.v("EXAMPLE", "successfully found a document: " + result);
-                if (Objects.equals(result.getPassword(), password)) {
-                    check.set(2);
-                }
+                if (result == null) check.set(1);
+                else if (!Objects.equals(result.getPassword(), password)) check.set(2);
+                else Log.v("EXAMPLE", "successfully found a document: " + result);
             } else {
+                check.set(3);
                 Log.e("EXAMPLE", "failed to find document with: ", task.getError());
             }
+            callback.accept(check);
         });
-
-        return check.get();
     }
-
 
     public void update(){
         queryFilter = new Document("name", "petunia");
@@ -130,7 +109,6 @@ public class Connect {
                 Log.e("EXAMPLE", "failed to update document with: ", task.getError());
             }
         });
-
     }
 
     public void delete(){
@@ -147,8 +125,6 @@ public class Connect {
                 Log.e("EXAMPLE", "failed to delete document with: ", task.getError());
             }
         });
-
-
     }
 }
 

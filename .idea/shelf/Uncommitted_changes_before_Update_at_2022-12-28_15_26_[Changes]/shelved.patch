@@ -1,0 +1,562 @@
+Index: app/src/main/java/com/example/biketracker/ui/login/LoginFragment.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.biketracker.ui.login;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.view.LayoutInflater;\r\nimport android.view.View;\r\nimport android.view.ViewGroup;\r\nimport android.widget.Button;\r\n\r\nimport androidx.fragment.app.Fragment;\r\nimport androidx.fragment.app.FragmentManager;\r\n\r\nimport com.example.biketracker.MainActivity;\r\nimport com.example.biketracker.R;\r\n\r\npublic class LoginFragment extends Fragment {\r\n\r\n    @Override\r\n    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {\r\n        View rootView = inflater.inflate(R.layout.fragment_login, container, false);\r\n        Button btnRegister = rootView.findViewById(R.id.buttonCreateAccount);\r\n\r\n        btnRegister.setOnClickListener(view -> {\r\n            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();\r\n            fragmentManager.beginTransaction()\r\n                    .replace(R.id.fragmentContainerView, RegisterFragment.class, null)\r\n                    .setReorderingAllowed(true)\r\n                    .addToBackStack(\"name\")\r\n                    .commit();\r\n        });\r\n\r\n        Button btnLogin = rootView.findViewById(R.id.buttonLogin);\r\n        btnLogin.setOnClickListener(view -> {\r\n            Intent intent = new Intent(getActivity(), MainActivity.class);\r\n            startActivity(intent);\r\n        });\r\n        return rootView;\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/biketracker/ui/login/LoginFragment.java b/app/src/main/java/com/example/biketracker/ui/login/LoginFragment.java
+--- a/app/src/main/java/com/example/biketracker/ui/login/LoginFragment.java	
++++ b/app/src/main/java/com/example/biketracker/ui/login/LoginFragment.java	
+@@ -2,17 +2,23 @@
+ 
+ import android.content.Intent;
+ import android.os.Bundle;
++import android.util.Log;
+ import android.view.LayoutInflater;
+ import android.view.View;
+ import android.view.ViewGroup;
+ import android.widget.Button;
++import android.widget.EditText;
+ 
+ import androidx.fragment.app.Fragment;
+ import androidx.fragment.app.FragmentManager;
+ 
++import com.example.biketracker.Connect;
++import com.example.biketracker.LoginActivity;
+ import com.example.biketracker.MainActivity;
+ import com.example.biketracker.R;
+ 
++import java.util.concurrent.atomic.AtomicInteger;
++
+ public class LoginFragment extends Fragment {
+ 
+     @Override
+@@ -30,9 +36,29 @@
+         });
+ 
+         Button btnLogin = rootView.findViewById(R.id.buttonLogin);
++        AtomicInteger a = new AtomicInteger();
+         btnLogin.setOnClickListener(view -> {
+-            Intent intent = new Intent(getActivity(), MainActivity.class);
+-            startActivity(intent);
++            EditText email = rootView.findViewById(R.id.editTextEmailAddress);
++            EditText password = rootView.findViewById(R.id.editTextPassword);
++            Connect connect = new Connect();
++            connect.read(email, String.valueOf(password), check -> a.set(check.get()));
++
++            switch (a.get()) {
++                case 0:
++                    Log.d("EXAMPLE", "wrong email");
++                    //wrong email
++                    break;
++                case 1:
++                    Log.d("EXAMPLE", "wrong password");
++                    //wrong password;
++                    break;
++                case 2:
++                    //success
++                    Intent intent = new Intent(getActivity(), MainActivity.class);
++                    startActivity(intent);
++                default:
++                    //error
++            }
+         });
+         return rootView;
+     }
+Index: app/src/main/java/com/example/biketracker/Connect.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.biketracker;\r\n\r\nimport static org.bson.codecs.configuration.CodecRegistries.fromProviders;\r\nimport static org.bson.codecs.configuration.CodecRegistries.fromRegistries;\r\n\r\nimport android.util.Log;\r\nimport android.widget.EditText;\r\n\r\nimport org.bson.Document;\r\nimport org.bson.codecs.configuration.CodecRegistry;\r\nimport org.bson.codecs.pojo.PojoCodecProvider;\r\nimport org.bson.types.ObjectId;\r\n\r\nimport java.util.concurrent.atomic.AtomicReference;\r\n\r\nimport io.realm.mongodb.App;\r\nimport io.realm.mongodb.AppConfiguration;\r\nimport io.realm.mongodb.Credentials;\r\nimport io.realm.mongodb.User;\r\nimport io.realm.mongodb.mongo.MongoClient;\r\nimport io.realm.mongodb.mongo.MongoCollection;\r\nimport io.realm.mongodb.mongo.MongoDatabase;\r\n\r\npublic class Connect {\r\n    String AppId = \"biketrackerapp-etvbv\";\r\n    MongoCollection<BikeUser> mongoCollection;\r\n    App app;\r\n    Credentials anonymousCredentials;\r\n    AtomicReference<User> user;\r\n    User appUser;\r\n    MongoClient mongoClient;\r\n    MongoDatabase mongoDatabase;\r\n    CodecRegistry pojoCodecRegistry;\r\n    Document queryFilter;\r\n\r\n    public void initialize(){\r\n        String appID = AppId;\r\n        app = new App(new AppConfiguration.Builder(appID).build());\r\n\r\n        anonymousCredentials = Credentials.anonymous();\r\n        user = new AtomicReference<>();\r\n        app.loginAsync(anonymousCredentials, it -> {\r\n            if (it.isSuccess()) {\r\n                Log.v(\"AUTH\", \"Successfully authenticated anonymously.\");\r\n                user.set(app.currentUser());\r\n            } else {\r\n                Log.e(\"AUTH\", it.getError().toString());\r\n            }\r\n        });\r\n\r\n        appUser = app.currentUser();\r\n        mongoClient = appUser.getMongoClient(\"mongodb-atlas\");\r\n        mongoDatabase = mongoClient.getDatabase(\"BikeTrackerApp\");\r\n// registry to handle POJOs (Plain Old Java Objects)\r\n        pojoCodecRegistry = fromRegistries(AppConfiguration.DEFAULT_BSON_CODEC_REGISTRY,\r\n                fromProviders(PojoCodecProvider.builder().automatic(true).build()));\r\n        mongoCollection = mongoDatabase.getCollection(\"users\",\r\n                BikeUser.class).withCodecRegistry(pojoCodecRegistry);\r\n\r\n        Log.v(\"EXAMPLE\", \"Successfully instantiated the MongoDB collection handle\");\r\n\r\n    }\r\n\r\n\r\n\r\n    public void create(EditText name, EditText email, EditText password){\r\n        BikeUser bikeUser = new BikeUser(\r\n                new ObjectId(),\r\n                name.getText().toString(),\r\n                email.getText().toString(),\r\n                password.getText().toString());\r\n        mongoCollection.insertOne(bikeUser).getAsync(task -> {\r\n            if (task.isSuccess()) {\r\n                Log.v(\"EXAMPLE\", \"successfully inserted a document with id: \" + task.get().getInsertedId());\r\n            } else {\r\n                Log.e(\"EXAMPLE\", \"failed to insert documents with: \" + task.getError().getErrorMessage());\r\n            }\r\n        });\r\n\r\n\r\n    }\r\n\r\n    public void read(){\r\n        queryFilter  = new Document(\"name\", \"Trump\");\r\n        mongoCollection.findOne(queryFilter).getAsync(task -> {\r\n            if (task.isSuccess()) {\r\n                BikeUser result = task.get();\r\n                Log.v(\"EXAMPLE\", \"successfully found a document: \" + result);\r\n            } else {\r\n                Log.e(\"EXAMPLE\", \"failed to find document with: \", task.getError());\r\n            }\r\n        });\r\n\r\n    }\r\n\r\n    public void update(){\r\n        queryFilter = new Document(\"name\", \"petunia\");\r\n        Document updateDocument = new Document(\"$set\", new Document(\"sunlight\", \"partial\"));\r\n        mongoCollection.updateOne(queryFilter, updateDocument).getAsync(task -> {\r\n            if (task.isSuccess()) {\r\n                long count = task.get().getModifiedCount();\r\n                if (count == 1) {\r\n                    Log.v(\"EXAMPLE\", \"successfully updated a document.\");\r\n                } else {\r\n                    Log.v(\"EXAMPLE\", \"did not update a document.\");\r\n                }\r\n            } else {\r\n                Log.e(\"EXAMPLE\", \"failed to update document with: \", task.getError());\r\n            }\r\n        });\r\n\r\n    }\r\n\r\n    public void delete(){\r\n        queryFilter = new Document(\"color\", \"green\");\r\n        mongoCollection.deleteOne(queryFilter).getAsync(task -> {\r\n            if (task.isSuccess()) {\r\n                long count = task.get().getDeletedCount();\r\n                if (count == 1) {\r\n                    Log.v(\"EXAMPLE\", \"successfully deleted a document.\");\r\n                } else {\r\n                    Log.v(\"EXAMPLE\", \"did not delete a document.\");\r\n                }\r\n            } else {\r\n                Log.e(\"EXAMPLE\", \"failed to delete document with: \", task.getError());\r\n            }\r\n        });\r\n\r\n\r\n    }\r\n}\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/biketracker/Connect.java b/app/src/main/java/com/example/biketracker/Connect.java
+--- a/app/src/main/java/com/example/biketracker/Connect.java	
++++ b/app/src/main/java/com/example/biketracker/Connect.java	
+@@ -6,11 +6,17 @@
+ import android.util.Log;
+ import android.widget.EditText;
+ 
++import androidx.core.util.Consumer;
++
+ import org.bson.Document;
+ import org.bson.codecs.configuration.CodecRegistry;
+ import org.bson.codecs.pojo.PojoCodecProvider;
+ import org.bson.types.ObjectId;
+ 
++import java.util.Objects;
++import java.util.concurrent.atomic.AtomicBoolean;
++import java.util.concurrent.atomic.AtomicInteger;
++import java.util.concurrent.atomic.AtomicLong;
+ import java.util.concurrent.atomic.AtomicReference;
+ 
+ import io.realm.mongodb.App;
+@@ -76,21 +82,24 @@
+                 Log.e("EXAMPLE", "failed to insert documents with: " + task.getError().getErrorMessage());
+             }
+         });
+-
+-
+     }
+ 
+-    public void read(){
+-        queryFilter  = new Document("name", "Trump");
++    public void read(EditText email, String password, Consumer<AtomicInteger> callback){
++        queryFilter = new Document("email", email);
++        AtomicInteger check = new AtomicInteger(0);
+         mongoCollection.findOne(queryFilter).getAsync(task -> {
+             if (task.isSuccess()) {
+                 BikeUser result = task.get();
++                check.set(1);
+                 Log.v("EXAMPLE", "successfully found a document: " + result);
++                if (Objects.equals(result.getPassword(), password)) {
++                    check.set(2);
++                }
+             } else {
+                 Log.e("EXAMPLE", "failed to find document with: ", task.getError());
+             }
++            callback.accept(check);  // invoke the callback function
+         });
+-
+     }
+ 
+     public void update(){
+Index: .idea/shelf/Uncommitted_changes_before_Checkout_at_2022-12-19_14_39_[Changes]/shelved.patch
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Checkout_at_2022-12-19_14_39_[Changes]/shelved.patch b/.idea/shelf/Uncommitted_changes_before_Checkout_at_2022-12-19_14_39_[Changes]/shelved.patch
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Checkout_at_2022-12-19_14_39_[Changes]/shelved.patch	
++++ /dev/null	
+@@ -1,39 +0,0 @@
+-Index: app/src/main/java/com/example/biketracker/ui/login/LoginFragment.java
+-IDEA additional info:
+-Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+-<+>package com.example.biketracker.ui.login;\r\n\r\nimport android.os.Bundle;\r\nimport android.view.LayoutInflater;\r\nimport android.view.View;\r\nimport android.view.ViewGroup;\r\nimport android.widget.TextView;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.fragment.app.Fragment;\r\nimport androidx.lifecycle.ViewModelProvider;\r\n\r\nimport com.example.biketracker.databinding.FragmentLoginBinding;\r\n\r\npublic class LoginFragment extends Fragment {\r\n\r\n    private FragmentLoginBinding binding;\r\n\r\n    public View onCreateView(@NonNull LayoutInflater inflater,\r\n                             ViewGroup container, Bundle savedInstanceState) {\r\n        LoginViewModel galleryViewModel =\r\n                new ViewModelProvider(this).get(LoginViewModel.class);\r\n\r\n        binding = FragmentLoginBinding.inflate(inflater, container, false);\r\n        View root = binding.getRoot();\r\n\r\n        final TextView textView = binding.textLogin;\r\n        galleryViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);\r\n        return root;\r\n    }\r\n\r\n    @Override\r\n    public void onDestroyView() {\r\n        super.onDestroyView();\r\n        binding = null;\r\n    }\r\n}
+-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+-<+>UTF-8
+-===================================================================
+-diff --git a/app/src/main/java/com/example/biketracker/ui/login/LoginFragment.java b/app/src/main/java/com/example/biketracker/ui/login/LoginFragment.java
+---- a/app/src/main/java/com/example/biketracker/ui/login/LoginFragment.java	(revision 80a6ad253a595619533604721f53d98d9afe3eea)
+-+++ b/app/src/main/java/com/example/biketracker/ui/login/LoginFragment.java	(date 1671456996849)
+-@@ -24,8 +24,7 @@
+-         binding = FragmentLoginBinding.inflate(inflater, container, false);
+-         View root = binding.getRoot();
+- 
+--        final TextView textView = binding.textLogin;
+--        galleryViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+-+
+-         return root;
+-     }
+- 
+-Index: .idea/misc.xml
+-IDEA additional info:
+-Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+-<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_17\" project-jdk-name=\"Android Studio default JDK\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/build/classes\" />\r\n  </component>\r\n  <component name=\"ProjectType\">\r\n    <option name=\"id\" value=\"Android\" />\r\n  </component>\r\n</project>
+-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+-<+>UTF-8
+-===================================================================
+-diff --git a/.idea/misc.xml b/.idea/misc.xml
+---- a/.idea/misc.xml	(revision 80a6ad253a595619533604721f53d98d9afe3eea)
+-+++ b/.idea/misc.xml	(date 1671456773090)
+-@@ -1,7 +1,7 @@
+- <?xml version="1.0" encoding="UTF-8"?>
+- <project version="4">
+-   <component name="ExternalStorageConfigurationManager" enabled="true" />
+--  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+-+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+-     <output url="file://$PROJECT_DIR$/build/classes" />
+-   </component>
+-   <component name="ProjectType">
+Index: .idea/shelf/Uncommitted_changes_before_Update_at_2022-12-19_11_16__Changes_.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Update_at_2022-12-19_11_16__Changes_.xml b/.idea/shelf/Uncommitted_changes_before_Update_at_2022-12-19_11_16__Changes_.xml
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Update_at_2022-12-19_11_16__Changes_.xml	
++++ /dev/null	
+@@ -1,4 +0,0 @@
+-<changelist name="Uncommitted_changes_before_Update_at_2022-12-19_11_16_[Changes]" date="1671445030724" recycled="true" deleted="true">
+-  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2022-12-19_11_16_[Changes]/shelved.patch" />
+-  <option name="DESCRIPTION" value="Uncommitted changes before Update at 2022-12-19 11:16 [Changes]" />
+-</changelist>
+\ No newline at end of file
+Index: .idea/shelf/Uncommitted_changes_before_Checkout_at_2022-12-19_14_39__Changes_.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Checkout_at_2022-12-19_14_39__Changes_.xml b/.idea/shelf/Uncommitted_changes_before_Checkout_at_2022-12-19_14_39__Changes_.xml
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Checkout_at_2022-12-19_14_39__Changes_.xml	
++++ /dev/null	
+@@ -1,4 +0,0 @@
+-<changelist name="Uncommitted_changes_before_Checkout_at_2022-12-19_14_39_[Changes]" date="1671457145821" recycled="true" deleted="true">
+-  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_2022-12-19_14_39_[Changes]/shelved.patch" />
+-  <option name="DESCRIPTION" value="Uncommitted changes before Checkout at 2022-12-19 14:39 [Changes]" />
+-</changelist>
+\ No newline at end of file
+Index: .idea/shelf/Uncommitted_changes_before_Update_at_2022-12-19_11_16_[Changes]/shelved.patch
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Update_at_2022-12-19_11_16_[Changes]/shelved.patch b/.idea/shelf/Uncommitted_changes_before_Update_at_2022-12-19_11_16_[Changes]/shelved.patch
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Update_at_2022-12-19_11_16_[Changes]/shelved.patch	
++++ /dev/null	
+@@ -1,75 +0,0 @@
+-Index: app/src/main/res/values/strings.xml
+-IDEA additional info:
+-Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+-<+><resources>\r\n    <string name=\"app_name\">BikeTracker</string>\r\n\r\n    <string name=\"menu_1\">Login</string>\r\n    <string name=\"menu_2\">Map</string>\r\n    <string name=\"menu_3\">Settings</string>\r\n    <string name=\"about_me\">About Me</string>\r\n</resources>
+-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+-<+>UTF-8
+-===================================================================
+-diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+---- a/app/src/main/res/values/strings.xml	(revision 906bf4db45a4501bce8da05e4257418898e51f88)
+-+++ b/app/src/main/res/values/strings.xml	(date 1671377854359)
+-@@ -5,4 +5,6 @@
+-     <string name="menu_2">Map</string>
+-     <string name="menu_3">Settings</string>
+-     <string name="about_me">About Me</string>
+-+    <!-- TODO: Remove or change this placeholder text -->
+-+    <string name="hello_blank_fragment">Hello blank fragment</string>
+- </resources>
+-\ No newline at end of file
+-Index: .idea/misc.xml
+-IDEA additional info:
+-Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+-<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_X\" project-jdk-name=\"Android Studio default JDK\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/build/classes\" />\r\n  </component>\r\n  <component name=\"ProjectType\">\r\n    <option name=\"id\" value=\"Android\" />\r\n  </component>\r\n</project>
+-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+-<+>UTF-8
+-===================================================================
+-diff --git a/.idea/misc.xml b/.idea/misc.xml
+---- a/.idea/misc.xml	(revision 906bf4db45a4501bce8da05e4257418898e51f88)
+-+++ b/.idea/misc.xml	(date 1671364021298)
+-@@ -1,7 +1,7 @@
+- <?xml version="1.0" encoding="UTF-8"?>
+- <project version="4">
+-   <component name="ExternalStorageConfigurationManager" enabled="true" />
+--  <component name="ProjectRootManager" version="2" languageLevel="JDK_X" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+-+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+-     <output url="file://$PROJECT_DIR$/build/classes" />
+-   </component>
+-   <component name="ProjectType">
+-Index: .idea/compiler.xml
+-IDEA additional info:
+-Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+-<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"CompilerConfiguration\">\r\n    <bytecodeTargetLevel target=\"18\" />\r\n  </component>\r\n</project>
+-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+-<+>UTF-8
+-===================================================================
+-diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+---- a/.idea/compiler.xml	(revision 906bf4db45a4501bce8da05e4257418898e51f88)
+-+++ b/.idea/compiler.xml	(date 1671365343898)
+-@@ -1,6 +1,6 @@
+- <?xml version="1.0" encoding="UTF-8"?>
+- <project version="4">
+-   <component name="CompilerConfiguration">
+--    <bytecodeTargetLevel target="18" />
+-+    <bytecodeTargetLevel target="11" />
+-   </component>
+- </project>
+-\ No newline at end of file
+-Index: .idea/gradle.xml
+-IDEA additional info:
+-Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+-<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"GradleMigrationSettings\" migrationVersion=\"1\" />\r\n  <component name=\"GradleSettings\">\r\n    <option name=\"linkedExternalProjectsSettings\">\r\n      <GradleProjectSettings>\r\n        <option name=\"testRunner\" value=\"GRADLE\" />\r\n        <option name=\"distributionType\" value=\"DEFAULT_WRAPPED\" />\r\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\r\n        <option name=\"gradleJvm\" value=\"18\" />\r\n        <option name=\"modules\">\r\n          <set>\r\n            <option value=\"$PROJECT_DIR$\" />\r\n            <option value=\"$PROJECT_DIR$/app\" />\r\n          </set>\r\n        </option>\r\n      </GradleProjectSettings>\r\n    </option>\r\n  </component>\r\n</project>
+-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+-<+>UTF-8
+-===================================================================
+-diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+---- a/.idea/gradle.xml	(revision 906bf4db45a4501bce8da05e4257418898e51f88)
+-+++ b/.idea/gradle.xml	(date 1671365343920)
+-@@ -7,7 +7,7 @@
+-         <option name="testRunner" value="GRADLE" />
+-         <option name="distributionType" value="DEFAULT_WRAPPED" />
+-         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+--        <option name="gradleJvm" value="18" />
+-+        <option name="gradleJvm" value="Embedded JDK" />
+-         <option name="modules">
+-           <set>
+-             <option value="$PROJECT_DIR$" />
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\" >\r\n\r\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\r\n        android:fullBackupContent=\"@xml/backup_rules\"\r\n        android:icon=\"@mipmap/ic_bike_tracker_logo\"\r\n        android:label=\"@string/app_name\"\r\n        android:roundIcon=\"@mipmap/ic_bike_tracker_logo_round\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/Theme.BikeTracker\"\r\n        tools:targetApi=\"31\" >\r\n        <activity\r\n            android:name=\".MainActivity\"\r\n            android:exported=\"false\">\r\n        </activity>\r\n\r\n        <meta-data\r\n            android:name=\"com.google.android.geo.API_KEY\"\r\n            android:value=\"${MAPS_API_KEY}\" />\r\n\r\n        <activity\r\n            android:name=\".LoginActivity\"\r\n            android:exported=\"true\" >\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n\r\n            <meta-data\r\n                android:name=\"android.app.lib_name\"\r\n                android:value=\"\" />\r\n        </activity>\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	
++++ b/app/src/main/AndroidManifest.xml	
+@@ -3,11 +3,6 @@
+     xmlns:tools="http://schemas.android.com/tools" >
+ 
+     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+ 
+     <application
+         android:allowBackup="true"
+Index: app/src/main/java/com/example/biketracker/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.biketracker;\r\n\r\nimport android.os.Bundle;\r\n\r\nimport com.example.biketracker.databinding.ActivityMainBinding;\r\n\r\nimport com.google.android.material.snackbar.Snackbar;\r\nimport com.google.android.material.navigation.NavigationView;\r\n\r\nimport androidx.navigation.NavController;\r\nimport androidx.navigation.Navigation;\r\nimport androidx.navigation.ui.AppBarConfiguration;\r\nimport androidx.navigation.ui.NavigationUI;\r\nimport androidx.drawerlayout.widget.DrawerLayout;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport io.realm.Realm;\r\n\r\npublic class MainActivity extends AppCompatActivity {\r\n\r\n    private AppBarConfiguration mAppBarConfiguration;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n\r\n        ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());\r\n        setContentView(binding.getRoot());\r\n\r\n        setSupportActionBar(binding.appBarMain.toolbar);\r\n        binding.appBarMain.fab.setOnClickListener(view -> Snackbar.make(view, \"This is a Bike Tracker App\", Snackbar.LENGTH_LONG)\r\n                .setAction(\"Action\", null).show());\r\n        DrawerLayout drawer = binding.drawerLayout;\r\n        NavigationView navigationView = binding.navView;\r\n\r\n        mAppBarConfiguration = new AppBarConfiguration.Builder(\r\n                R.id.nav_map, R.id.nav_settings)\r\n                .setOpenableLayout(drawer)\r\n                .build();\r\n        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);\r\n        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);\r\n        NavigationUI.setupWithNavController(navigationView, navController);\r\n        Realm.init(this);\r\n        Connect connect = new Connect();\r\n        connect.initialize();\r\n    }\r\n\r\n    @Override\r\n    public boolean onSupportNavigateUp() {\r\n        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);\r\n        return NavigationUI.navigateUp(navController, mAppBarConfiguration) || super.onSupportNavigateUp();\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/biketracker/MainActivity.java b/app/src/main/java/com/example/biketracker/MainActivity.java
+--- a/app/src/main/java/com/example/biketracker/MainActivity.java	
++++ b/app/src/main/java/com/example/biketracker/MainActivity.java	
+@@ -14,8 +14,6 @@
+ import androidx.drawerlayout.widget.DrawerLayout;
+ import androidx.appcompat.app.AppCompatActivity;
+ 
+-import io.realm.Realm;
+-
+ public class MainActivity extends AppCompatActivity {
+ 
+     private AppBarConfiguration mAppBarConfiguration;
+@@ -40,9 +38,6 @@
+         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+         NavigationUI.setupWithNavController(navigationView, navController);
+-        Realm.init(this);
+-        Connect connect = new Connect();
+-        connect.initialize();
+     }
+ 
+     @Override
+Index: app/src/main/java/com/example/biketracker/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.biketracker;\r\n\r\nimport android.os.Bundle;\r\n\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\npublic class LoginActivity extends AppCompatActivity {\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_login);\r\n\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/biketracker/LoginActivity.java b/app/src/main/java/com/example/biketracker/LoginActivity.java
+--- a/app/src/main/java/com/example/biketracker/LoginActivity.java	
++++ b/app/src/main/java/com/example/biketracker/LoginActivity.java	
+@@ -4,6 +4,11 @@
+ 
+ import androidx.appcompat.app.AppCompatActivity;
+ 
++import io.realm.Realm;
++import io.realm.RealmConfiguration;
++import io.realm.mongodb.App;
++import io.realm.mongodb.AppConfiguration;
++
+ public class LoginActivity extends AppCompatActivity {
+ 
+     @Override
+@@ -11,5 +16,8 @@
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_login);
+ 
++        Realm.init(this);
++        Connect connect = new Connect();
++        connect.initialize();
+     }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/biketracker/ui/login/RegisterFragment.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.biketracker.ui.login;\r\n\r\nimport android.os.Bundle;\r\n\r\nimport androidx.fragment.app.Fragment;\r\nimport androidx.fragment.app.FragmentManager;\r\n\r\nimport android.view.LayoutInflater;\r\nimport android.view.View;\r\nimport android.view.ViewGroup;\r\nimport android.widget.Button;\r\n\r\nimport com.example.biketracker.R;\r\n\r\npublic class RegisterFragment extends Fragment {\r\n\r\n    @Override\r\n    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {\r\n        View rootView = inflater.inflate(R.layout.fragment_register, container, false);\r\n        Button btnFirst = rootView.findViewById(R.id.buttonTest);\r\n\r\n        btnFirst.setOnClickListener(view -> {\r\n            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();\r\n            fragmentManager.beginTransaction()\r\n                    .replace(R.id.fragmentContainerView, LoginFragment.class, null)\r\n                    .setReorderingAllowed(true)\r\n                    .addToBackStack(\"name\")\r\n                    .commit();\r\n        });\r\n        return rootView;\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/biketracker/ui/login/RegisterFragment.java b/app/src/main/java/com/example/biketracker/ui/login/RegisterFragment.java
+--- a/app/src/main/java/com/example/biketracker/ui/login/RegisterFragment.java	
++++ b/app/src/main/java/com/example/biketracker/ui/login/RegisterFragment.java	
+@@ -1,15 +1,16 @@
+ package com.example.biketracker.ui.login;
+ 
+ import android.os.Bundle;
+-
+-import androidx.fragment.app.Fragment;
+-import androidx.fragment.app.FragmentManager;
+-
+ import android.view.LayoutInflater;
+ import android.view.View;
+ import android.view.ViewGroup;
+ import android.widget.Button;
++import android.widget.EditText;
+ 
++import androidx.fragment.app.Fragment;
++import androidx.fragment.app.FragmentManager;
++
++import com.example.biketracker.Connect;
+ import com.example.biketracker.R;
+ 
+ public class RegisterFragment extends Fragment {
+@@ -17,7 +18,7 @@
+     @Override
+     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+         View rootView = inflater.inflate(R.layout.fragment_register, container, false);
+-        Button btnFirst = rootView.findViewById(R.id.buttonTest);
++        Button btnFirst = rootView.findViewById(R.id.buttonBackToLogin);
+ 
+         btnFirst.setOnClickListener(view -> {
+             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+@@ -27,6 +28,19 @@
+                     .addToBackStack("name")
+                     .commit();
+         });
++
++        Button buttonRegister = rootView.findViewById(R.id.buttonRegister);
++
++        buttonRegister.setOnClickListener(view -> {
++            EditText email = rootView.findViewById(R.id.editTextRegisterEmail);
++            EditText password = rootView.findViewById(R.id.editTextRegisterPassword);
++            EditText name = rootView.findViewById(R.id.editTextRegisterName);
++
++            Connect connect = new Connect();
++            connect.create(name, email, password);
++        });
++
++
+         return rootView;
+     }
+ }
+\ No newline at end of file
+Index: app/src/main/res/layout/fragment_register.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    tools:context=\".ui.login.RegisterFragment\">\r\n\r\n    <Button\r\n        android:id=\"@+id/buttonTest\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:text=\"Button\"\r\n        app:layout_constraintBottom_toBottomOf=\"parent\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintTop_toTopOf=\"parent\" />\r\n</androidx.constraintlayout.widget.ConstraintLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/fragment_register.xml b/app/src/main/res/layout/fragment_register.xml
+--- a/app/src/main/res/layout/fragment_register.xml	
++++ b/app/src/main/res/layout/fragment_register.xml	
+@@ -7,12 +7,64 @@
+     tools:context=".ui.login.RegisterFragment">
+ 
+     <Button
+-        android:id="@+id/buttonTest"
++        android:id="@+id/buttonBackToLogin"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+-        android:text="Button"
++        android:text="Back to Login"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@+id/buttonRegister" />
++
++    <EditText
++        android:id="@+id/editTextRegisterEmail"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="10dp"
++        android:ems="10"
++        android:hint="@string/registerEmail"
++        android:inputType="textEmailAddress"
++        android:minHeight="48dp"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintHorizontal_bias="0.5"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@+id/editTextRegisterName" />
++
++    <EditText
++        android:id="@+id/editTextRegisterPassword"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="10dp"
++        android:ems="10"
++        android:hint="@string/registerPassword"
++        android:inputType="textPassword"
++        android:minHeight="48dp"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintHorizontal_bias="0.5"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@+id/editTextRegisterEmail" />
++
++    <EditText
++        android:id="@+id/editTextRegisterName"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="200dp"
++        android:ems="10"
++        android:hint="@string/registerName"
++        android:inputType="textPersonName"
++        android:minHeight="48dp"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintHorizontal_bias="0.5"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintTop_toTopOf="parent" />
++
++    <Button
++        android:id="@+id/buttonRegister"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="10dp"
++        android:text="Register"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@+id/editTextRegisterPassword" />
+ </androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
+Index: app/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    id 'com.android.application'\r\n    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'\r\n}\r\napply plugin: \"realm-android\"\r\nandroid {\r\n    namespace 'com.example.biketracker'\r\n    compileSdk 33\r\n\r\n    defaultConfig {\r\n        applicationId \"com.example.biketracker\"\r\n        minSdk 21\r\n        targetSdk 33\r\n        versionCode 1\r\n        versionName \"1.0\"\r\n\r\n        testInstrumentationRunner \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            minifyEnabled false\r\n            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility JavaVersion.VERSION_1_8\r\n        targetCompatibility JavaVersion.VERSION_1_8\r\n    }\r\n    buildFeatures {\r\n        viewBinding true\r\n    }\r\n}\r\n\r\nrealm {\r\n    syncEnabled = true\r\n}\r\n\r\ndependencies {\r\n\r\n    implementation 'androidx.appcompat:appcompat:1.5.1'\r\n    implementation 'com.google.android.material:material:1.7.0'\r\n    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'\r\n    implementation 'androidx.navigation:navigation-fragment:2.5.3'\r\n    implementation 'androidx.navigation:navigation-ui:2.5.3'\r\n    implementation 'io.realm:realm-gradle-plugin:10.10.1'\r\n    implementation 'com.google.android.gms:play-services-maps:18.1.0'\r\n    testImplementation 'junit:junit:4.13.2'\r\n    androidTestImplementation 'androidx.test.ext:junit:1.1.4'\r\n    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle b/app/build.gradle
+--- a/app/build.gradle	
++++ b/app/build.gradle	
+@@ -1,6 +1,7 @@
+ plugins {
+     id 'com.android.application'
+     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
++    id 'realm-android'
+ }
+ apply plugin: "realm-android"
+ android {
+@@ -43,7 +44,7 @@
+     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+     implementation 'androidx.navigation:navigation-fragment:2.5.3'
+     implementation 'androidx.navigation:navigation-ui:2.5.3'
+-    implementation 'io.realm:realm-gradle-plugin:10.10.1'
++    implementation 'io.realm:realm-gradle-plugin:10.11.1'
+     implementation 'com.google.android.gms:play-services-maps:18.1.0'
+     testImplementation 'junit:junit:4.13.2'
+     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+Index: app/src/main/res/values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><resources>\r\n    <string name=\"app_name\">BikeTracker</string>\r\n\r\n    <string name=\"menu_1\">Login</string>\r\n    <string name=\"menu_2\">Map</string>\r\n    <string name=\"menu_3\">Settings</string>\r\n    <string name=\"about_me\">About Me</string>\r\n\r\n\r\n    =======\r\n    <string name=\"map\">Map</string>\r\n    <string name=\"settings\">Settings</string>\r\n    <string name=\"login\">Login</string>\r\n    <string name=\"account_settings\">Account Settings</string>\r\n    <string name=\"notification_settings\">Notification Settings</string>\r\n    <string name=\"description\">description</string>\r\n    >>>>>>> 80a6ad253a595619533604721f53d98d9afe3eea\r\n\r\n    <!--Login Fragment-->\r\n    <string name=\"loginPassword\">Password</string>\r\n    <string name=\"loginEmail\">Email</string>\r\n    <string name=\"buttonLogin\">Login</string>\r\n    <string name=\"buttonCreateAccount\">Create Account</string>\r\n    <string name=\"textViewForgotPassword\">Forgot your password?</string>\r\n    <!-- TODO: Remove or change this placeholder text -->\r\n    <string name=\"hello_blank_fragment\">Hello blank fragment</string>\r\n    <string name=\"title_activity_second\">SecondActivity</string>\r\n    <!-- Strings used for fragments for navigation -->\r\n    <string name=\"first_fragment_label\">First Fragment</string>\r\n    <string name=\"second_fragment_label\">Second Fragment</string>\r\n    <string name=\"next\">Next</string>\r\n    <string name=\"previous\">Previous</string>\r\n\r\n    <string name=\"hello_first_fragment\">Hello first fragment</string>\r\n    <string name=\"hello_second_fragment\">Hello second fragment. Arg: %1$s</string>\r\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+--- a/app/src/main/res/values/strings.xml	
++++ b/app/src/main/res/values/strings.xml	
+@@ -22,15 +22,9 @@
+     <string name="buttonLogin">Login</string>
+     <string name="buttonCreateAccount">Create Account</string>
+     <string name="textViewForgotPassword">Forgot your password?</string>
+-    <!-- TODO: Remove or change this placeholder text -->
+-    <string name="hello_blank_fragment">Hello blank fragment</string>
+-    <string name="title_activity_second">SecondActivity</string>
+-    <!-- Strings used for fragments for navigation -->
+-    <string name="first_fragment_label">First Fragment</string>
+-    <string name="second_fragment_label">Second Fragment</string>
+-    <string name="next">Next</string>
+-    <string name="previous">Previous</string>
+ 
+-    <string name="hello_first_fragment">Hello first fragment</string>
+-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
++    <!--Register Fragment-->
++    <string name="registerPassword">Password</string>
++    <string name="registerName">Name</string>
++    <string name="registerEmail">Email</string>
+ </resources>
+\ No newline at end of file
