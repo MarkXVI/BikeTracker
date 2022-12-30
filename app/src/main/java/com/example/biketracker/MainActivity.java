@@ -1,7 +1,9 @@
 package com.example.biketracker;
 
+import android.app.Activity;
 import android.os.Bundle;
 
+import com.example.biketracker.DB.Connect;
 import com.example.biketracker.databinding.ActivityMainBinding;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -34,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationView navigationView = binding.navView;
 
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_login, R.id.nav_map, R.id.nav_settings)
+                R.id.nav_map, R.id.nav_settings)
                 .setOpenableLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
@@ -45,15 +47,13 @@ public class MainActivity extends AppCompatActivity {
         connect.initialize();
     }
 
-/*  @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }*/
-
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration) || super.onSupportNavigateUp();
+    }
+
+    public Activity getActivity() {
+        return this;
     }
 }
