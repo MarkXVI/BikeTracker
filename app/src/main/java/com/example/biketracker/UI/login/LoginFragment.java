@@ -1,4 +1,4 @@
-package com.example.biketracker.ui.login;
+package com.example.biketracker.UI.login;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,9 +12,10 @@ import android.widget.EditText;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.example.biketracker.Connect;
+import com.example.biketracker.DB.Connect;
 import com.example.biketracker.MainActivity;
 import com.example.biketracker.R;
+import com.example.biketracker.UI.register.RegisterFragment;
 
 public class LoginFragment extends Fragment {
 
@@ -42,18 +43,18 @@ public class LoginFragment extends Fragment {
 
                 switch (check.get()) {
                     case 0:
-                        Log.e("EXAMPLE", "Success");
+                        Log.v("LoginFragment", "Success");
                         Intent intent = new Intent(getActivity(), MainActivity.class);
                         startActivity(intent);
                         break;
                     case 1:
-                        Log.e("EXAMPLE", "Wrong email");
+                        Log.e("LoginFragment", "Wrong email");
                         break;
                     case 2:
-                        Log.e("EXAMPLE", "Wrong password");
+                        Log.e("LoginFragment", "Wrong password");
                         break;
                     default:
-                        Log.e("EXAMPLE", "Error");
+                        Log.e("LoginFragment", "Error");
                         break;
                 }
             });

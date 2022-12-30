@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
@@ -7,25 +8,25 @@
 
     <fragment
         android:id="@+id/nav_map"
-        android:name="com.example.biketracker.ui.map.MapFragment"
+        android:name="com.example.biketracker.UI.map.MapFragment"
         android:label="@string/map"
         tools:layout="@layout/fragment_map" />
 
     <fragment
         android:id="@+id/nav_settings"
-        android:name="com.example.biketracker.ui.settings.SettingsFragment"
+        android:name="com.example.biketracker.UI.settings.SettingsFragment"
         android:label="@string/settings"
         tools:layout="@layout/fragment_settings" />
 
     <fragment
         android:id="@+id/nav_notification_settings"
-        android:name="com.example.biketracker.ui.settings.SettingsFragment"
+        android:name="com.example.biketracker.UI.settings.SettingsFragment"
         android:label="@string/notification_settings"
         tools:layout="@layout/fragment_settings" />
 
     <fragment
         android:id="@+id/nav_account_settings"
-        android:name="com.example.biketracker.ui.settings.SettingsFragment"
+        android:name="com.example.biketracker.UI.settings.SettingsFragment"
         android:label="@string/account_settings"
         tools:layout="@layout/fragment_settings" />
 

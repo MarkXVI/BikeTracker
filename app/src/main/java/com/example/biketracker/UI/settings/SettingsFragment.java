@@ -1,4 +1,4 @@
-package com.example.biketracker.ui.settings;
+package com.example.biketracker.UI.settings;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

@@ -1,19 +1,17 @@
 <resources>
     <string name="app_name">BikeTracker</string>
 
+    <!--  Menu  -->
     <string name="menu_1">Login</string>
     <string name="menu_2">Map</string>
     <string name="menu_3">Settings</string>
-    <string name="about_me">About Me</string>
 
-    =======
     <string name="map">Map</string>
     <string name="settings">Settings</string>
     <string name="login">Login</string>
     <string name="account_settings">Account Settings</string>
     <string name="notification_settings">Notification Settings</string>
     <string name="description">description</string>
-    >>>>>>> 80a6ad253a595619533604721f53d98d9afe3eea
 
     <!--Login Fragment-->
     <string name="loginPassword">Password</string>

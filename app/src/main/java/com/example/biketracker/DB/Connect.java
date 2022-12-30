@@ -1,8 +1,9 @@
-package com.example.biketracker;
+package com.example.biketracker.DB;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
+import android.os.Build;
 import android.util.Log;
 
 import androidx.core.util.Consumer;
@@ -44,34 +45,43 @@ public class Connect {
         user = new AtomicReference<>();
         app.loginAsync(anonymousCredentials, it -> {
             if (it.isSuccess()) {
-                Log.v("AUTH", "Successfully authenticated anonymously.");
+                Log.v("Connect AUTH", "Successfully authenticated anonymously.");
                 user.set(app.currentUser());
             } else {
-                Log.e("AUTH", it.getError().toString());
+                Log.e("Connect AUTH", it.getError().toString());
             }
         });
 
         appUser = app.currentUser();
+        assert appUser != null;
         mongoClient = appUser.getMongoClient("mongodb-atlas");
         mongoDatabase = mongoClient.getDatabase("BikeTrackerApp");
-// registry to handle POJOs (Plain Old Java Objects)
+        // registry to handle POJOs (Plain Old Java Objects)
         pojoCodecRegistry = fromRegistries(AppConfiguration.DEFAULT_BSON_CODEC_REGISTRY,
                 fromProviders(PojoCodecProvider.builder().automatic(true).build()));
         mongoCollection = mongoDatabase.getCollection("users",
                 BikeUser.class).withCodecRegistry(pojoCodecRegistry);
 
-        Log.v("EXAMPLE", "Successfully instantiated the MongoDB collection handle");
+        Log.v("Connect initialize", "Successfully instantiated the MongoDB collection handle");
     }
 
     public void create(String name, String email, String password, Consumer<AtomicInteger> callback) {
         AtomicInteger check = new AtomicInteger(0);
-        BikeUser bikeUser = new BikeUser(new ObjectId(), name, email, password);
+        BikeUser bikeUser = null;
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                bikeUser = new BikeUser(new ObjectId(), name, email, PasswordUtils.hashPassword(password));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         mongoCollection.insertOne(bikeUser).getAsync(task -> {
             if (task.isSuccess()) {
                 check.set(1);
-                Log.v("EXAMPLE", "successfully inserted a document with id: " + task.get().getInsertedId());
+                Log.v("Connect create", "successfully inserted a document with id: " + task.get().getInsertedId());
             } else {
-                Log.e("EXAMPLE", "failed to insert documents with: " + task.getError().getErrorMessage());
+                Log.e("Connect create", "failed to insert documents with: " + task.getError().getErrorMessage());
             }
             callback.accept(check);
         });
@@ -84,16 +94,23 @@ public class Connect {
             if (task.isSuccess()) {
                 BikeUser result = task.get();
                 if (result == null) check.set(1);
-                else if (!Objects.equals(result.getPassword(), password)) check.set(2);
-                else Log.v("EXAMPLE", "successfully found a document: " + result);
+                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    try {
+                        if (!Objects.equals(result.getPassword(), PasswordUtils.hashPassword(password))) check.set(2);
+                        else Log.v("Connect read", "successfully found a document: " + result);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             } else {
                 check.set(3);
-                Log.e("EXAMPLE", "failed to find document with: ", task.getError());
+                Log.e("Connect read", "failed to find document with: ", task.getError());
             }
             callback.accept(check);
         });
     }
 
+    // TODO: Make this functional with the project
     public void update(){
         queryFilter = new Document("name", "petunia");
         Document updateDocument = new Document("$set", new Document("sunlight", "partial"));
@@ -101,28 +118,29 @@ public class Connect {
             if (task.isSuccess()) {
                 long count = task.get().getModifiedCount();
                 if (count == 1) {
-                    Log.v("EXAMPLE", "successfully updated a document.");
+                    Log.v("Connect update", "successfully updated a document.");
                 } else {
-                    Log.v("EXAMPLE", "did not update a document.");
+                    Log.v("Connect update", "did not update a document.");
                 }
             } else {
-                Log.e("EXAMPLE", "failed to update document with: ", task.getError());
+                Log.e("Connect update", "failed to update document with: ", task.getError());
             }
         });
     }
 
+    // TODO: Make this functional with the project
     public void delete(){
         queryFilter = new Document("color", "green");
         mongoCollection.deleteOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
                 long count = task.get().getDeletedCount();
                 if (count == 1) {
-                    Log.v("EXAMPLE", "successfully deleted a document.");
+                    Log.v("Connect delete", "successfully deleted a document.");
                 } else {
-                    Log.v("EXAMPLE", "did not delete a document.");
+                    Log.v("Connect delete", "did not delete a document.");
                 }
             } else {
-                Log.e("EXAMPLE", "failed to delete document with: ", task.getError());
+                Log.e("Connect delete", "failed to delete document with: ", task.getError());
             }
         });
     }
