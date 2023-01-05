@@ -12,6 +12,7 @@
     <string name="account_settings">Account Settings</string>
     <string name="notification_settings">Notification Settings</string>
     <string name="description">description</string>
+    <string name="groups">Groups</string>
 
     <!--Login Fragment-->
     <string name="loginPassword">Password</string>
@@ -25,4 +26,12 @@
     <string name="register">Register</string>
     <string name="registerEmail">Email</string>
     <string name="fullName">Full Name</string>
+
+    <!--Group Fragment-->
+    <string name="groupName">Group Name</string>
+    <string name="createGroup">Create Group</string>
+    <string name="create_a_new_group">Create A New Group</string>
+    <string name="create_a_new_device">Create A New Device</string>
+    <string name="name">Name</string>
+    <string name="create_device">Create Device</string>
 </resources>
