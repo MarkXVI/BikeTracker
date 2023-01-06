@@ -26,6 +26,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -42,7 +43,7 @@ import java.util.concurrent.Future;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
-    private static final int UPDATE_INTERVAL_MILLIS = 5000; // 5 seconds
+    private static final int UPDATE_INTERVAL_MILLIS = 30000; // 30 seconds
 
     private Handler mHandler;
     private Runnable mUpdateMapRunnable;
@@ -100,12 +101,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void updateMap() {
-        // update the map fragment
-        // ...
+        Log.i("MapFragment UpdateMap", "Updating...");
+        SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        assert supportMapFragment != null;
+        supportMapFragment.getMapAsync(this);
     }
 
     @Override
     public void onPause() {
+        Log.i("MapFragment UpdateMap", "Paused");
         super.onPause();
 
         // stop the updates when the activity is paused
@@ -114,6 +118,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onResume() {
+        Log.i("MapFragment UpdateMap", "Resumed");
         super.onResume();
 
         // start the updates when the activity is resumed
@@ -165,29 +170,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-            HTTPRequest httpRequest = new HTTPRequest();
-            try {
-                locationsForMap = new JSONArray();
-                locationsForMap.put(httpRequest.requestLocation("6038298e459b2700069d025e"));
-                JSONObject obj = new JSONObject();
+        Thread thread = new Thread(() -> {
+        HTTPRequest httpRequest = new HTTPRequest(requireContext());
+        try {
+            locationsForMap = new JSONArray();
+            locationsForMap.put(httpRequest.requestLocation("6038298e459b2700069d025e"));
+            JSONObject obj = new JSONObject();
 
-                obj.put("name", "Sydney");
-                obj.put("latLng", "[-34,151]");
-                locationsForMap.put(obj);
+            obj.put("name", "Sydney");
+            obj.put("latLng", "[-34,151]");
+            locationsForMap.put(obj);
 
-                obj = new JSONObject();
-                obj.put("name", "Veberöd");
-                obj.put("latLng", "[55.6364,13.5006]");
-                locationsForMap.put(obj);
+            obj = new JSONObject();
+            obj.put("name", "Veberöd");
+            obj.put("latLng", "[55.6364,13.5006]");
+            locationsForMap.put(obj);
 
-                Log.v("MapFragment onMapReady", locationsForMap.toString());
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-            }
-        }});
+            Log.v("MapFragment onMapReady", locationsForMap.toString());
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+    });
 
         thread.start();
         try {

@@ -1,23 +1,16 @@
 package com.example.biketracker.DB;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
-import androidx.core.util.Consumer;
-
-import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.Gson;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import okhttp3.FormBody;
-import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -31,8 +24,10 @@ import okio.Buffer;
 public class HTTPRequest {
 
     OkHttpClient client;
+    Context context;
 
-    public HTTPRequest () {
+    public HTTPRequest (Context context) {
+        this.context = context;
 
         client = new OkHttpClient.Builder()
                 .addInterceptor(chain -> {
@@ -83,16 +78,16 @@ public class HTTPRequest {
         int responseCode = tokenResponse.code();
         if (responseCode == 200) {
             // request was successful
-            Log.v("HTTPRequest", "Hurray 200");
+            Log.v("HTTPRequest Token", "Hurray 200");
         } else {
             // request was not successful
-            Log.v("HTTPRequest", "Boo");
+            Log.v("HTTPRequest Token", "Response Code: " + responseCode + ". Boo!");
         }
         ResponseBody body = tokenResponse.body();
         if (body != null) {
             String responseString = body.string();
             JSONObject json = new JSONObject(responseString);
-            Log.v("HTTPRequest", String.valueOf(json));
+            Log.v("HTTPRequest Token", String.valueOf(json));
             token = json.getString("token");
         }
 
@@ -102,13 +97,15 @@ public class HTTPRequest {
 
     public JSONObject requestLocation(String id) throws IOException, JSONException {
 
+        String token = requestToken();
+
         JSONObject obj = new JSONObject();
 
         Request locationRequest = new Request.Builder()
                 .url("https://kraftringen.yggio.net/api/iotnodes/" + id)
                 .get()
                 .addHeader("accept", "application/json")
-                .addHeader("Authorization", "Bearer " + requestToken())
+                .addHeader("Authorization", "Bearer " + token)
                 .build();
 
         Response locationResponse = client.newCall(locationRequest).execute();
@@ -116,22 +113,22 @@ public class HTTPRequest {
         int responseCode = locationResponse.code();
         if (responseCode == 200) {
             // request was successful
-            Log.v("HTTPRequest", "Hurray 200");
+            Log.v("HTTPRequest Location", "Hurray 200");
         } else {
             // request was not successful
-            Log.v("HTTPRequest", "Boo");
+            Log.v("HTTPRequest Location", "Response Code: " + responseCode + ". Boo!");
         }
         ResponseBody body = locationResponse.body();
         if (body != null) {
             String responseString = body.string();
-            Log.v("HTTPRequest", responseString);
+            Log.v("HTTPRequest Location", responseString);
             JSONObject json = new JSONObject(responseString);
             String name = json.getString("name");
             String latlng = json.getString("latlng");
 
             obj.put("name", name);
             obj.put("latLng", latlng);
-            Log.v("HTTPRequest", obj.toString());
+            Log.v("HTTPRequest Location", obj.toString());
         }
         return obj;
     }
