@@ -25,4 +25,5 @@
     <string name="register">Register</string>
     <string name="registerEmail">Email</string>
     <string name="fullName">Full Name</string>
+    <string name="myLocationDescription">Center device GPS location on map</string>
 </resources>

@@ -27,6 +27,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,9 +68,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map) ;
+        SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         assert supportMapFragment != null;
         supportMapFragment.getMapAsync(this);
+
+        binding.fab.setOnClickListener(view -> {
+            Log.v(TAG, "fab CLICK");
+            Snackbar.make(view, "This is a Bike Tracker App", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+        });
+
+        binding.myLocation.setOnClickListener(view -> {
+            Log.v(TAG, "myLocation CLICK");
+            centerCurrentLocation(view);
+        });
 
         return root;
     }
@@ -82,11 +93,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 locationResult.addOnCompleteListener(requireActivity(), task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         lastKnownLocation = task.getResult();
-                        if (lastKnownLocation != null) {
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(lastKnownLocation.getLatitude(),
-                                            lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                        }
+                        centerCurrentLocation(getView());
                     } else {
                         Log.d(TAG, "Current location is null. Using defaults.");
                         Log.e(TAG, "Exception: %s", task.getException());
@@ -218,6 +225,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    public void centerCurrentLocation(View view) {
+        if (lastKnownLocation != null) {
+            Snackbar.make(view, (lastKnownLocation.getLatitude() + ", " + lastKnownLocation.getLongitude()) , Snackbar.LENGTH_LONG).setAction("Action", null).show();
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(lastKnownLocation.getLatitude(),
+                            lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
         }
     }
 }
