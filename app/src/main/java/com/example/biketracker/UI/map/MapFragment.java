@@ -3,6 +3,7 @@ package com.example.biketracker.UI.map;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,12 +24,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
+    private static final int UPDATE_INTERVAL_MILLIS = 5000; // 5 seconds
+
+    private Handler mHandler;
+    private Runnable mUpdateMapRunnable;
 
     private static final String TAG = MapFragment.class.getSimpleName();
     protected GoogleMap map;
@@ -52,6 +56,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
+        mHandler = new Handler();
+        mUpdateMapRunnable = () -> {
+            // update the map
+            updateMap();
+
+            // schedule the next update
+            mHandler.postDelayed(mUpdateMapRunnable, UPDATE_INTERVAL_MILLIS);
+        };
+        mHandler.postDelayed(mUpdateMapRunnable, UPDATE_INTERVAL_MILLIS);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         assert supportMapFragment != null;
@@ -68,6 +82,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
 
         return root;
+    }
+
+    private void updateMap() {
+        // update the map fragment
+        // ...
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // stop the updates when the activity is paused
+        mHandler.removeCallbacks(mUpdateMapRunnable);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // start the updates when the activity is resumed
+        mHandler.postDelayed(mUpdateMapRunnable, UPDATE_INTERVAL_MILLIS);
     }
 
     private void getDeviceLocation() {
