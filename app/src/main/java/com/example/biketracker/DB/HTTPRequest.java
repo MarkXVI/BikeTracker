@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import okhttp3.MediaType;
@@ -93,7 +94,7 @@ public class HTTPRequest {
     }
 
 
-    public JSONObject requestLocation(String id) throws IOException, JSONException {
+    public ArrayList<String> requestLocation(String id) throws IOException, JSONException {
 
         String token = SaveSharedPreference.getYggioToken(context);
         if (token.equals("")) {
@@ -102,7 +103,7 @@ public class HTTPRequest {
         }
 
 
-        JSONObject obj = new JSONObject();
+        ArrayList<String> obj = new ArrayList<>();
 
         Request locationRequest = new Request.Builder()
                 .url("https://kraftringen.yggio.net/api/iotnodes/" + id)
@@ -127,11 +128,14 @@ public class HTTPRequest {
             Log.v("HTTPRequest Location", responseString);
             JSONObject json = new JSONObject(responseString);
             String name = json.getString("name");
-            String latlng = json.getString("latlng");
+            String[] latlng = json.getString("latlng").split(",");
+            String longitude = latlng[0].substring(1);
+            String latitude = latlng[1].substring(0, latlng[1].length() - 1);
 
-            obj.put("name", name);
-            obj.put("latLng", latlng);
-            Log.v("HTTPRequest Location", obj.toString());
+            obj.add(name);
+            obj.add(longitude);
+            obj.add(latitude);
+            Log.v("HTTPRequest Location", String.valueOf(obj));
         }
         return obj;
     }

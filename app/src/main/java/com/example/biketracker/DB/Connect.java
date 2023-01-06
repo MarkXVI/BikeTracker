@@ -73,7 +73,8 @@ public class Connect {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 ArrayList<ObjectId> deviceIds = new ArrayList<>();
-                bikeUser = new BikeUser(new ObjectId(), name, email, PasswordUtils.hashPassword(password), deviceIds);
+                ArrayList<ArrayList<String>> checkPoints = new ArrayList<>();
+                bikeUser = new BikeUser(new ObjectId(), name, email, PasswordUtils.hashPassword(password), deviceIds, checkPoints);
             }
 
         } catch (Exception e) {
@@ -197,6 +198,59 @@ public class Connect {
                 Log.e("GET GROUPS", "Failed to find a user with the email: " + email);
             }
             callback.accept(ids);
+        });
+    }
+
+    public void addCheckPoint(String name, String latitude, String longitude, String email, Consumer<AtomicInteger> callback) {
+        AtomicInteger check = new AtomicInteger(0);
+        CountDownLatch latch = new CountDownLatch(1);
+        queryFilter = new Document("email", email);
+        mongoCollection.findOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) {
+                Log.v("ADD CHECKPOINT TO USER", "Successfully found a user with the email: " + email);
+
+                BikeUser result = task.get();
+                ArrayList<ArrayList<String>> checkPoints = result.getcheckPoints();
+                ArrayList<String> checkpoint = new ArrayList<>();
+                checkpoint.add(name);
+                checkpoint.add(latitude);
+                checkpoint.add(longitude);
+                checkPoints.add(checkpoint);
+                result.setcheckPoints(checkPoints);
+
+                Document updateDocument = new Document("$set", new Document("checkPoints", checkPoints));
+                mongoCollection.updateOne(queryFilter, updateDocument).getAsync(it -> {
+                    if (it.isSuccess()) check.set(1);
+                    latch.countDown();
+                });
+            } else {
+                Log.e("ADD CHECKPOINT TO USER", String.valueOf(task.getError()));
+                latch.countDown();
+            }
+        });
+        new Thread(() -> {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            callback.accept(check);
+        }).start();
+    }
+
+    public void getCheckPoints(String email, Consumer<AtomicReference<ArrayList<ArrayList<String>>>> callback) {
+        AtomicReference<ArrayList<ArrayList<String>>> checkPoints = new AtomicReference<>(new ArrayList<>());
+        queryFilter = new Document("email", email);
+        mongoCollection.findOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) {
+                Log.v("GET CHECKPOINTS", "Found a user with the email: " + email);
+                BikeUser result = task.get();
+                ArrayList<ArrayList<String>> list = result.getcheckPoints();
+                checkPoints.set(list);
+            } else {
+                Log.e("GET CHECKPOINTS", "Failed to find a user with the email: " + email);
+            }
+            callback.accept(checkPoints);
         });
     }
 }

@@ -1,6 +1,9 @@
 package com.example.biketracker.UI.map;
 
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,16 +27,16 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -56,7 +59,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private FragmentMapBinding binding;
     MainActivity mainActivity;
 
-    JSONArray locationsForMap;
+    ArrayList<ArrayList<String>> deviceLocations = new ArrayList<>();
+    ArrayList<ArrayList<String>> checkPointLocations = new ArrayList<>();
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -127,7 +131,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 locationResult.addOnCompleteListener(requireActivity(), task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         lastKnownLocation = task.getResult();
-                        centerCurrentLocation(getView());
+//                        centerCurrentLocation(getView());
                     } else {
                         Log.d(TAG, "Current location is null. Using defaults.");
                         Log.e(TAG, "Exception: %s", task.getException());
@@ -167,20 +171,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         Thread thread = new Thread(() -> {
         HTTPRequest httpRequest = new HTTPRequest(requireContext());
         try {
-            locationsForMap = new JSONArray();
-            locationsForMap.put(httpRequest.requestLocation("6038298e459b2700069d025e"));
-            JSONObject obj = new JSONObject();
 
-            obj.put("name", "Sydney");
-            obj.put("latLng", "[-34,151]");
-            locationsForMap.put(obj);
+            deviceLocations = new ArrayList<>();
+            deviceLocations.add(httpRequest.requestLocation("6038298e459b2700069d025e"));
 
-            obj = new JSONObject();
-            obj.put("name", "Veberöd");
-            obj.put("latLng", "[55.6364,13.5006]");
-            locationsForMap.put(obj);
+            ArrayList<String> obj = new ArrayList<>();
 
-            Log.v("MapFragment onMapReady", locationsForMap.toString());
+            obj.add( "Sydney");
+            obj.add("-34");
+            obj.add("151");
+            checkPointLocations.add(obj);
+
+            obj = new ArrayList<>();
+            obj.add("Veberöd");
+            obj.add("55.6364");
+            obj.add("13.5006");
+            checkPointLocations.add(obj);
+
+            Log.v("MapFragment onMapReady", deviceLocations.toString());
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
@@ -190,7 +198,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         try {
             thread.join();
 
-            addToMap();
+            if (deviceLocations.size() != 0) {
+                addDevicesToMap();
+            }
+            if (checkPointLocations.size() != 0) {
+                addCheckPointsToMap();
+            }
 
             getLocationPermission();
             updateLocationUI();
@@ -201,31 +214,59 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    private void addToMap() {
+    private void addDevicesToMap() {
 
-        for (int i = 0; i < locationsForMap.length(); i++) {
-
-            JSONObject value;
-            String name = "";
-            LatLng latLng = null;
-            try {
-                value = (JSONObject) locationsForMap.get(i);
-                Log.v("MapFragment addToMap", String.valueOf(value));
-                // get the name and LatLng from the value object
-                name = value.getString("name");
-                JSONArray jsonArray = new JSONArray(value.getString("latLng"));
-                double latitude = jsonArray.getDouble(0);
-                double longitude = jsonArray.getDouble(1);
-                latLng = new LatLng(latitude, longitude);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        for (int i = 0; i < deviceLocations.size(); i++) {
+            ArrayList<String> list = deviceLocations.get(i);
+            // get the name and LatLng from the value object
+            String name = list.get(0);
+            LatLng latLng = new LatLng(Double.parseDouble(list.get(1)), Double.parseDouble(list.get(2)));
             Log.v("MapFragment addToMap", "name: " + name + ", latLng: " + latLng);
-            assert latLng != null;
-            map.addMarker(new MarkerOptions().position(latLng).title("Marker for " + name).visible(true));
+            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_bike);
+            map.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromBitmap(getResizedBitmap(icon, 150, 150)))
+                    .position(latLng)
+                    .title(name)
+                    .visible(true));
         }
 
     }
+
+    private void addCheckPointsToMap() {
+
+        for (int i = 0; i < checkPointLocations.size(); i++) {
+            ArrayList<String> list = checkPointLocations.get(i);
+            // get the name and LatLng from the value object
+            String name = list.get(0);
+            LatLng latLng = new LatLng(Double.parseDouble(list.get(1)), Double.parseDouble(list.get(2)));
+            Log.v("MapFragment addToMap", "name: " + name + ", latLng: " + latLng);
+            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_home);
+            map.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromBitmap(getResizedBitmap(icon, 150, 150)))
+                    .position(latLng)
+                    .title(name)
+                    .visible(true));
+        }
+
+    }
+
+    private Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        bm.recycle();
+        return resizedBitmap;
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
