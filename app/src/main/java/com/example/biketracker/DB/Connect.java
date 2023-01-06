@@ -13,7 +13,9 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
 
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -37,9 +39,8 @@ public class Connect {
     CodecRegistry pojoCodecRegistry;
     Document queryFilter;
 
-    public void initialize(){
-        String appID = AppId;
-        app = new App(new AppConfiguration.Builder(appID).build());
+    public void initialize(Runnable callback) {
+        app = new App(new AppConfiguration.Builder(AppId).build());
 
         anonymousCredentials = Credentials.anonymous();
         user = new AtomicReference<>();
@@ -50,6 +51,7 @@ public class Connect {
             } else {
                 Log.e("Connect AUTH", it.getError().toString());
             }
+            callback.run();
         });
 
         appUser = app.currentUser();
@@ -70,7 +72,8 @@ public class Connect {
         BikeUser bikeUser = null;
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                bikeUser = new BikeUser(new ObjectId(), name, email, PasswordUtils.hashPassword(password));
+                ArrayList<ObjectId> deviceIds = new ArrayList<>();
+                bikeUser = new BikeUser(new ObjectId(), name, email, PasswordUtils.hashPassword(password), deviceIds);
             }
 
         } catch (Exception e) {
@@ -96,8 +99,11 @@ public class Connect {
                 if (result == null) check.set(1);
                 else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     try {
-                        if (!Objects.equals(result.getPassword(), PasswordUtils.hashPassword(password))) check.set(2);
-                        else Log.v("Connect read", "successfully found a document: " + result);
+                        if (!Objects.equals(result.getPassword(), PasswordUtils.hashPassword(password)))
+                            check.set(2);
+                        else {
+                            Log.v("Connect read", "successfully found a document: " + result);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -111,7 +117,7 @@ public class Connect {
     }
 
     // TODO: Make this functional with the project
-    public void update(){
+    public void update() {
         queryFilter = new Document("name", "petunia");
         Document updateDocument = new Document("$set", new Document("sunlight", "partial"));
         mongoCollection.updateOne(queryFilter, updateDocument).getAsync(task -> {
@@ -129,7 +135,7 @@ public class Connect {
     }
 
     // TODO: Make this functional with the project
-    public void delete(){
+    public void delete() {
         queryFilter = new Document("color", "green");
         mongoCollection.deleteOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
@@ -142,6 +148,55 @@ public class Connect {
             } else {
                 Log.e("Connect delete", "failed to delete document with: ", task.getError());
             }
+        });
+    }
+
+    public void addGroupToUser(ObjectId id, String email, Consumer<AtomicInteger> callback) {
+        AtomicInteger check = new AtomicInteger(0);
+        CountDownLatch latch = new CountDownLatch(1);
+        queryFilter = new Document("email", email);
+        mongoCollection.findOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) {
+                Log.v("ADD GROUP TO USER", "Successfully found a user with the email: " + email);
+
+                BikeUser result = task.get();
+                ArrayList<ObjectId> ids = result.getGroupIds();
+                ids.add(id);
+                result.setGroupIds(ids);
+
+                Document updateDocument = new Document("$set", new Document("groupIds", ids));
+                mongoCollection.updateOne(queryFilter, updateDocument).getAsync(it -> {
+                    if (it.isSuccess()) check.set(1);
+                    latch.countDown();
+                });
+            } else {
+                Log.e("ADD GROUP TO USER", String.valueOf(task.getError()));
+                latch.countDown();
+            }
+        });
+        new Thread(() -> {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            callback.accept(check);
+        }).start();
+    }
+
+    public void getGroupIds(String email, Consumer<AtomicReference<ArrayList<ObjectId>>> callback) {
+        AtomicReference<ArrayList<ObjectId>> ids = new AtomicReference<>(new ArrayList<>());
+        queryFilter = new Document("email", email);
+        mongoCollection.findOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) {
+                Log.v("GET GROUPS", "Found a user with the email: " + email);
+                BikeUser result = task.get();
+                ArrayList<ObjectId> list = result.getGroupIds();
+                ids.set(list);
+            } else {
+                Log.e("GET GROUPS", "Failed to find a user with the email: " + email);
+            }
+            callback.accept(ids);
         });
     }
 }

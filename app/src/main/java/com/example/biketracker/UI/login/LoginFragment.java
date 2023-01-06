@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.biketracker.DB.Connect;
+import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.MainActivity;
 import com.example.biketracker.R;
 import com.example.biketracker.UI.register.RegisterFragment;
@@ -27,7 +28,7 @@ public class LoginFragment extends Fragment {
         btnRegister.setOnClickListener(view -> {
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             fragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainerView, RegisterFragment.class, null)
+                    .replace(R.id.fragmentContainerViewLoginActivity, RegisterFragment.class, null)
                     .setReorderingAllowed(true)
                     .addToBackStack("name")
                     .commit();
@@ -38,12 +39,11 @@ public class LoginFragment extends Fragment {
             EditText email = rootView.findViewById(R.id.editTextLoginEmail);
             EditText password = rootView.findViewById(R.id.editTextLoginPassword);
             Connect connect = new Connect();
-            connect.initialize();
-            connect.read(email.getText().toString(), password.getText().toString(), check -> {
-
+            connect.initialize(() -> connect.read(email.getText().toString(), password.getText().toString(), check -> {
                 switch (check.get()) {
                     case 0:
                         Log.v("LoginFragment", "Success");
+                        SaveSharedPreference.setEmail(getContext(), email.getText().toString());
                         Intent intent = new Intent(getActivity(), MainActivity.class);
                         startActivity(intent);
                         break;
@@ -57,7 +57,7 @@ public class LoginFragment extends Fragment {
                         Log.e("LoginFragment", "Error");
                         break;
                 }
-            });
+            }));
         });
         return rootView;
     }
