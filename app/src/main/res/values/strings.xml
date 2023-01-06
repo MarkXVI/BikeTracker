@@ -34,4 +34,5 @@
     <string name="create_a_new_device">Create A New Device</string>
     <string name="name">Name</string>
     <string name="create_device">Create Device</string>
+    <string name="myLocationDescription">Center device GPS location on map</string>
 </resources>
