@@ -1,14 +1,12 @@
 package com.example.biketracker.DB;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Objects;
 
 import okhttp3.MediaType;
@@ -97,7 +95,12 @@ public class HTTPRequest {
 
     public JSONObject requestLocation(String id) throws IOException, JSONException {
 
-        String token = requestToken();
+        String token = SaveSharedPreference.getYggioToken(context);
+        if (token.equals("")) {
+            token = requestToken();
+            SaveSharedPreference.setYggioToken(context, token);
+        }
+
 
         JSONObject obj = new JSONObject();
 
