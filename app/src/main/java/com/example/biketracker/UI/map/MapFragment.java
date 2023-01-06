@@ -2,6 +2,7 @@ package com.example.biketracker.UI.map;
 
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -14,6 +15,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.biketracker.DB.HTTPRequest;
 import com.example.biketracker.MainActivity;
 import com.example.biketracker.R;
 import com.example.biketracker.databinding.FragmentMapBinding;
@@ -26,6 +28,17 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -47,6 +60,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private FragmentMapBinding binding;
     MainActivity mainActivity;
+
+    JSONArray locationsForMap;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -140,7 +155,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -150,29 +164,74 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
-//        LatLng sydney = new LatLng(-34, 151);
-//        map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        map.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-//        LatLng veberod = new LatLng(55.6364, 13.5006);
-//        map.addMarker(new MarkerOptions().position(veberod).title("Marker in Veberöd"));
-//        map.moveCamera(CameraUpdateFactory.newLatLng(veberod));
 
-        getLocationPermission();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+            HTTPRequest httpRequest = new HTTPRequest();
+            try {
+                locationsForMap = new JSONArray();
+                locationsForMap.put(httpRequest.requestLocation("6038298e459b2700069d025e"));
+                JSONObject obj = new JSONObject();
 
-        updateLocationUI();
+                obj.put("name", "Sydney");
+                obj.put("latLng", "[-34,151]");
+                locationsForMap.put(obj);
 
-        getDeviceLocation();
+                obj = new JSONObject();
+                obj.put("name", "Veberöd");
+                obj.put("latLng", "[55.6364,13.5006]");
+                locationsForMap.put(obj);
 
-        // Current Location
-//        LatLng current = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-//        googleMap.addMarker(new MarkerOptions().position(current).title("CurrentLocation"));
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(current));
+                Log.v("MapFragment onMapReady", locationsForMap.toString());
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
+        }});
+
+        thread.start();
+        try {
+            thread.join();
+
+            addToMap();
+
+            getLocationPermission();
+            updateLocationUI();
+            getDeviceLocation();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addToMap() {
+
+        for (int i = 0; i < locationsForMap.length(); i++) {
+
+            JSONObject value;
+            String name = "";
+            LatLng latLng = null;
+            try {
+                value = (JSONObject) locationsForMap.get(i);
+                Log.v("MapFragment addToMap", String.valueOf(value));
+                // get the name and LatLng from the value object
+                name = value.getString("name");
+                JSONArray jsonArray = new JSONArray(value.getString("latLng"));
+                double latitude = jsonArray.getDouble(0);
+                double longitude = jsonArray.getDouble(1);
+                latLng = new LatLng(latitude, longitude);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Log.v("MapFragment addToMap", "name: " + name + ", latLng: " + latLng);
+            assert latLng != null;
+            map.addMarker(new MarkerOptions().position(latLng).title("Marker for " + name).visible(true));
+        }
+
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         locationPermissionGranted = false;
         if (requestCode
                 == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {// If request is cancelled, the result arrays are empty.
