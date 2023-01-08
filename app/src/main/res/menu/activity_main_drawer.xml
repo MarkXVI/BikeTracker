@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@drawable/side_nav_bar"
-    tools:showIn="navigation_view">
+    tools:showIn="navigation_view"
+    android:background="@drawable/side_nav_bar">
 
     <group
         android:checkableBehavior="single"
-        android:title="@string/app_name">
+        android:title="@string/app_name" >
         <item
             android:id="@+id/nav_map"
             android:icon="@drawable/ic_map"
