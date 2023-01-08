@@ -10,10 +10,10 @@ import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
 
-import com.example.biketracker.DB.DAOs.UserDAO;
-import com.example.biketracker.DB.Schemas.Group;
 import com.example.biketracker.DB.DAOs.GroupDAO;
+import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
+import com.example.biketracker.DB.Schemas.Group;
 import com.example.biketracker.R;
 
 import org.bson.types.ObjectId;
@@ -44,7 +44,7 @@ public class CreateGroupFragment extends Fragment {
             ObjectId id = new ObjectId();
             Group group = new Group(id, name.getText().toString(), new ArrayList<>());
 
-           groupDAO.create(group, check1 -> {
+            groupDAO.create(group, check1 -> {
                 if (check1.get() == 0) {
                     Log.e("CREATE GROUP", "Could not create the group");
                     return;

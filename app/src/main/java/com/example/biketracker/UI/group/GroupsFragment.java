@@ -11,20 +11,16 @@ import android.widget.ListView;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.example.biketracker.DB.DAOs.GroupDAO;
 import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.R;
-import com.example.biketracker.UI.device.CreateDeviceFragment;
 import com.example.biketracker.UI.device.DevicesFragment;
-import com.example.biketracker.UI.register.RegisterFragment;
 
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class GroupsFragment extends Fragment {

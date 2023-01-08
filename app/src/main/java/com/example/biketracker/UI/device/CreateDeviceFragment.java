@@ -10,10 +10,10 @@ import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
 
-import com.example.biketracker.DB.Schemas.Device;
 import com.example.biketracker.DB.DAOs.DeviceDAO;
 import com.example.biketracker.DB.DAOs.GroupDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
+import com.example.biketracker.DB.Schemas.Device;
 import com.example.biketracker.R;
 
 import org.bson.types.ObjectId;
@@ -40,7 +40,7 @@ public class CreateDeviceFragment extends Fragment {
             ObjectId id = new ObjectId();
             Device device = new Device(id, deviceName.getText().toString());
 
-           deviceDAO.create(device, check1 -> {
+            deviceDAO.create(device, check1 -> {
                 if (check1.get() == 0) {
                     Log.e("CREATE DEVICE", "Could not create the device");
                     return;

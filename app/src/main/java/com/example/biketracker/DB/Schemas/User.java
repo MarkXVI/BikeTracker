@@ -6,11 +6,11 @@ import java.util.ArrayList;
 
 public class User {
 
+    public ArrayList<ObjectId> groupIds = new ArrayList<>();
     private ObjectId id;
     private String name;
     private String email;
     private String password;
-    public ArrayList<ObjectId> groupIds = new ArrayList<>();
 
     public User() {
     }

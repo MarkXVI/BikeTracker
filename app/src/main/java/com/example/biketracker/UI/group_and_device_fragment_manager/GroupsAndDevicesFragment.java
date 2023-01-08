@@ -5,15 +5,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.biketracker.R;
-import com.example.biketracker.UI.device.DevicesFragment;
 import com.example.biketracker.UI.group.GroupsFragment;
-
-import io.realm.Realm;
 
 public class GroupsAndDevicesFragment extends Fragment {
 
