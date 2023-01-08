@@ -39,4 +39,5 @@
     <string name="delete_group">Delete Group</string>
     <string name="done">Done</string>
     <string name="delete_device">Delete Device</string>
+    <string name="myLocationDescription">Center device GPS location on map</string>
 </resources>
