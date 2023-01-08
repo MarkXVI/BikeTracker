@@ -7,9 +7,10 @@ import android.preference.PreferenceManager;
 public class SaveSharedPreference {
     static final String PREF_EMAIL = "email";
     static final String PREF_GROUP_NAME = "group";
+    static final String PREF_DEVICE_NAME = "device";
 
-    static SharedPreferences getSharedPreferences(Context ctx) {
-        return PreferenceManager.getDefaultSharedPreferences(ctx);
+    static SharedPreferences getSharedPreferences(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public static void setEmail(Context context, String email) {
@@ -30,5 +31,15 @@ public class SaveSharedPreference {
 
     public static String getGroupName(Context context) {
         return getSharedPreferences(context).getString(PREF_GROUP_NAME, "");
+    }
+
+    public static void setDeviceName(Context context, String name) {
+        SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+        editor.putString(PREF_DEVICE_NAME, name);
+        editor.apply();
+    }
+
+    public static String getDeviceName(Context context) {
+        return getSharedPreferences(context).getString(PREF_DEVICE_NAME, "");
     }
 }

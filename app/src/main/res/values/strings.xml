@@ -34,4 +34,9 @@
     <string name="create_a_new_device">Create A New Device</string>
     <string name="name">Name</string>
     <string name="create_device">Create Device</string>
+    <string name="device_name">Device Name</string>
+    <string name="edit_group_name">Edit Group Name</string>
+    <string name="delete_group">Delete Group</string>
+    <string name="done">Done</string>
+    <string name="delete_device">Delete Device</string>
 </resources>

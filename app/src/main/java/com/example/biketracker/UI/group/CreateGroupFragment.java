@@ -10,9 +10,9 @@ import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
 
-import com.example.biketracker.DB.Connect;
-import com.example.biketracker.DB.Group;
-import com.example.biketracker.DB.GroupDAO;
+import com.example.biketracker.DB.DAOs.UserDAO;
+import com.example.biketracker.DB.Schemas.Group;
+import com.example.biketracker.DB.DAOs.GroupDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.R;
 
@@ -25,6 +25,13 @@ public class CreateGroupFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_create_group, container, false);
+
+        UserDAO userDAO = new UserDAO();
+        userDAO.initialize();
+
+        GroupDAO groupDAO = new GroupDAO();
+        groupDAO.initialize();
+
         Button btnCreateGroup = rootView.findViewById(R.id.buttonCreateGroup);
         btnCreateGroup.setOnClickListener(view -> {
             EditText name = rootView.findViewById(R.id.editTextCreateGroupName);
@@ -37,20 +44,18 @@ public class CreateGroupFragment extends Fragment {
             ObjectId id = new ObjectId();
             Group group = new Group(id, name.getText().toString(), new ArrayList<>());
 
-            GroupDAO groupDAO = new GroupDAO();
-            groupDAO.initialize(() -> groupDAO.create(group, check1 -> {
+           groupDAO.create(group, check1 -> {
                 if (check1.get() == 0) {
                     Log.e("CREATE GROUP", "Could not create the group");
                     return;
                 }
                 Log.v("CREATE GROUP", "Successfully created a group");
-                Connect connect = new Connect();
-                connect.initialize(() -> connect.addGroupToUser(id, email, check2 -> {
+                userDAO.addGroupToUser(id, email, check2 -> {
                     if (check2.get() == 0)
                         Log.e("ADD GROUP TO USER", "Could not add the group to the user");
                     else Log.v("ADD GROUP TO USER", "Added the group to the user");
-                }));
-            }));
+                });
+            });
         });
         return rootView;
     }
