@@ -9,12 +9,14 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.biketracker.DB.DAOs.GroupDAO;
 import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.DB.Schemas.Group;
 import com.example.biketracker.R;
+import com.example.biketracker.UI.device.DevicesFragment;
 
 import org.bson.types.ObjectId;
 
@@ -51,9 +53,17 @@ public class CreateGroupFragment extends Fragment {
                 }
                 Log.v("CREATE GROUP", "Successfully created a group");
                 userDAO.addGroupToUser(id, email, check2 -> {
-                    if (check2.get() == 0)
+                    if (check2.get() == 0) {
                         Log.e("ADD GROUP TO USER", "Could not add the group to the user");
-                    else Log.v("ADD GROUP TO USER", "Added the group to the user");
+                        return;
+                    }
+                    FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fragmentContainerViewGroupsAndDevices, GroupsFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .addToBackStack("name")
+                            .commit();
+
                 });
             });
         });

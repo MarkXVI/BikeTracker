@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.biketracker.DB.DAOs.DeviceDAO;
 import com.example.biketracker.DB.DAOs.GroupDAO;
@@ -49,11 +50,17 @@ public class CreateDeviceFragment extends Fragment {
                 String groupName = SaveSharedPreference.getGroupName(getContext());
 
                 groupDAO.addDeviceToGroup(id, groupName, check2 -> {
-                    if (check2.get() == 0)
+                    if (check2.get() == 0) {
                         Log.e("ADD DEVICE TO GROUP", "Could not add the device to the group");
-                    else {
-                        Log.v("ADD DEVICE TO GROUP", "Added the device to the group");
+                        return;
                     }
+                    FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fragmentContainerViewGroupsAndDevices, DevicesFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .addToBackStack("name")
+                            .commit();
+
                 });
             });
         });
