@@ -1,10 +1,10 @@
-package com.example.biketracker.DB;
+package com.example.biketracker.DB.Schemas;
 
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 
-public class BikeUser {
+public class User {
 
     private ObjectId id;
     private String name;
@@ -13,10 +13,10 @@ public class BikeUser {
     public ArrayList<ObjectId> groupIds = new ArrayList<>();
     public ArrayList<ArrayList<String>> checkPoints = new ArrayList<>();
 
-    public BikeUser() {
+    public User() {
     }
 
-    public BikeUser(ObjectId id, String name, String email, String password, ArrayList<ObjectId> groupIds, ArrayList<ArrayList<String>> checkPoints) {
+    public User(ObjectId id, String name, String email, String password, ArrayList<ObjectId> groupIds, ArrayList<ArrayList<String>> checkPoints) {
         this.id = id;
         this.name = name;
         this.email = email;

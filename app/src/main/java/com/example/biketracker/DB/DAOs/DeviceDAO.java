@@ -1,4 +1,4 @@
-package com.example.biketracker.DB;
+package com.example.biketracker.DB.DAOs;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -6,6 +6,8 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import android.util.Log;
 
 import androidx.core.util.Consumer;
+
+import com.example.biketracker.DB.Schemas.Device;
 
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -23,7 +25,7 @@ import io.realm.mongodb.mongo.MongoClient;
 import io.realm.mongodb.mongo.MongoCollection;
 import io.realm.mongodb.mongo.MongoDatabase;
 
-public class DeviceDAO extends Connect {
+public class DeviceDAO extends UserDAO {
 
     String AppId = "biketrackerapp-etvbv";
     MongoCollection<Device> mongoCollection;

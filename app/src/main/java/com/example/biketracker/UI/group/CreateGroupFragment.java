@@ -10,9 +10,9 @@ import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
 
-import com.example.biketracker.DB.Connect;
-import com.example.biketracker.DB.Group;
-import com.example.biketracker.DB.GroupDAO;
+import com.example.biketracker.DB.DAOs.UserDAO;
+import com.example.biketracker.DB.Schemas.Group;
+import com.example.biketracker.DB.DAOs.GroupDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.R;
 
@@ -44,8 +44,8 @@ public class CreateGroupFragment extends Fragment {
                     return;
                 }
                 Log.v("CREATE GROUP", "Successfully created a group");
-                Connect connect = new Connect();
-                connect.initialize(() -> connect.addGroupToUser(id, email, check2 -> {
+                UserDAO userDAO = new UserDAO();
+                userDAO.initialize(() -> userDAO.addGroupToUser(id, email, check2 -> {
                     if (check2.get() == 0)
                         Log.e("ADD GROUP TO USER", "Could not add the group to the user");
                     else Log.v("ADD GROUP TO USER", "Added the group to the user");

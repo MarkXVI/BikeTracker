@@ -1,4 +1,4 @@
-package com.example.biketracker.DB;
+package com.example.biketracker.DB.DAOs;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -6,6 +6,8 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import android.util.Log;
 
 import androidx.core.util.Consumer;
+
+import com.example.biketracker.DB.Schemas.Group;
 
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;

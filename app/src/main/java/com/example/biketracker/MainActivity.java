@@ -1,6 +1,5 @@
 package com.example.biketracker;
 
-import android.app.Activity;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,10 +9,9 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.example.biketracker.DB.Connect;
+import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
 
 import io.realm.Realm;
 
@@ -44,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navigationView, navController);
 
         Realm.init(this);
-        Connect connect = new Connect();
-        connect.initialize(() -> {
+        UserDAO userDAO = new UserDAO();
+        userDAO.initialize(() -> {
         });
     }
 

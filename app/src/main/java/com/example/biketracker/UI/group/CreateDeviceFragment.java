@@ -9,12 +9,10 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
-import com.example.biketracker.DB.Device;
-import com.example.biketracker.DB.DeviceDAO;
-import com.example.biketracker.DB.GroupDAO;
+import com.example.biketracker.DB.Schemas.Device;
+import com.example.biketracker.DB.DAOs.DeviceDAO;
+import com.example.biketracker.DB.DAOs.GroupDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.R;
 

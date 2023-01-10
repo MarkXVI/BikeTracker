@@ -12,9 +12,9 @@ import android.widget.ListView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.example.biketracker.DB.Connect;
-import com.example.biketracker.DB.DeviceDAO;
-import com.example.biketracker.DB.GroupDAO;
+import com.example.biketracker.DB.DAOs.UserDAO;
+import com.example.biketracker.DB.DAOs.DeviceDAO;
+import com.example.biketracker.DB.DAOs.GroupDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.R;
 
@@ -32,8 +32,8 @@ public class GroupsFragment extends Fragment {
         ListView listView = rootView.findViewById(R.id.listViewGroups);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         listView.setAdapter(adapter);
-        Connect connect = new Connect();
-        connect.initialize(() -> connect.getGroupIds(email, list -> {
+        UserDAO userDAO = new UserDAO();
+        userDAO.initialize(() -> userDAO.getGroupIds(email, list -> {
             AtomicReference<ArrayList<ObjectId>> ids = new AtomicReference<>(new ArrayList<>());
             ids.set(list.get());
             Log.v("GET GROUPS", "List of group IDs: " + ids.get());

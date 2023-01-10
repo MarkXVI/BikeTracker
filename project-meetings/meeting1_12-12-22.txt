@@ -1,7 +1,7 @@
 2 DBS
 1 that picks up sensors (yggio)
 
-jan has ordered 2 sensors and is going to connect to db1
+jan has ordered 2 sensors and is going to userDAO to db1
 gdpr
 
 db2 ?

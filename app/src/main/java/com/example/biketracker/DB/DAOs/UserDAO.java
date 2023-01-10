@@ -1,4 +1,4 @@
-package com.example.biketracker.DB;
+package com.example.biketracker.DB.DAOs;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -7,6 +7,9 @@ import android.os.Build;
 import android.util.Log;
 
 import androidx.core.util.Consumer;
+
+import com.example.biketracker.DB.PasswordUtils;
+import com.example.biketracker.DB.Schemas.User;
 
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -22,18 +25,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import io.realm.mongodb.App;
 import io.realm.mongodb.AppConfiguration;
 import io.realm.mongodb.Credentials;
-import io.realm.mongodb.User;
 import io.realm.mongodb.mongo.MongoClient;
 import io.realm.mongodb.mongo.MongoCollection;
 import io.realm.mongodb.mongo.MongoDatabase;
 
-public class Connect {
+public class UserDAO {
     String AppId = "biketrackerapp-etvbv";
-    MongoCollection<BikeUser> mongoCollection;
+    MongoCollection<User> mongoCollection;
     App app;
     Credentials anonymousCredentials;
-    AtomicReference<User> user;
-    User appUser;
+    AtomicReference<io.realm.mongodb.User> user;
+    io.realm.mongodb.User appUser;
     MongoClient mongoClient;
     MongoDatabase mongoDatabase;
     CodecRegistry pojoCodecRegistry;
@@ -62,25 +64,25 @@ public class Connect {
         pojoCodecRegistry = fromRegistries(AppConfiguration.DEFAULT_BSON_CODEC_REGISTRY,
                 fromProviders(PojoCodecProvider.builder().automatic(true).build()));
         mongoCollection = mongoDatabase.getCollection("users",
-                BikeUser.class).withCodecRegistry(pojoCodecRegistry);
+                User.class).withCodecRegistry(pojoCodecRegistry);
 
         Log.v("Connect initialize", "Successfully instantiated the MongoDB collection handle");
     }
 
     public void create(String name, String email, String password, Consumer<AtomicInteger> callback) {
         AtomicInteger check = new AtomicInteger(0);
-        BikeUser bikeUser = null;
+        User user = null;
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 ArrayList<ObjectId> deviceIds = new ArrayList<>();
                 ArrayList<ArrayList<String>> checkPoints = new ArrayList<>();
-                bikeUser = new BikeUser(new ObjectId(), name, email, PasswordUtils.hashPassword(password), deviceIds, checkPoints);
+                user = new User(new ObjectId(), name, email, PasswordUtils.hashPassword(password), deviceIds, checkPoints);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        mongoCollection.insertOne(bikeUser).getAsync(task -> {
+        mongoCollection.insertOne(user).getAsync(task -> {
             if (task.isSuccess()) {
                 check.set(1);
                 Log.v("Connect create", "successfully inserted a document with id: " + task.get().getInsertedId());
@@ -96,7 +98,7 @@ public class Connect {
         queryFilter = new Document("email", email);
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
-                BikeUser result = task.get();
+                User result = task.get();
                 if (result == null) check.set(1);
                 else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     try {
@@ -160,7 +162,7 @@ public class Connect {
             if (task.isSuccess()) {
                 Log.v("ADD GROUP TO USER", "Successfully found a user with the email: " + email);
 
-                BikeUser result = task.get();
+                User result = task.get();
                 ArrayList<ObjectId> ids = result.getGroupIds();
                 ids.add(id);
                 result.setGroupIds(ids);
@@ -191,7 +193,7 @@ public class Connect {
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
                 Log.v("GET GROUPS", "Found a user with the email: " + email);
-                BikeUser result = task.get();
+                User result = task.get();
                 ArrayList<ObjectId> list = result.getGroupIds();
                 ids.set(list);
             } else {
@@ -209,7 +211,7 @@ public class Connect {
             if (task.isSuccess()) {
                 Log.v("ADD CHECKPOINT TO USER", "Successfully found a user with the email: " + email);
 
-                BikeUser result = task.get();
+                User result = task.get();
                 ArrayList<ArrayList<String>> checkPoints = result.getcheckPoints();
                 ArrayList<String> checkpoint = new ArrayList<>();
                 checkpoint.add(name);
@@ -244,7 +246,7 @@ public class Connect {
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
                 Log.v("GET CHECKPOINTS", "Found a user with the email: " + email);
-                BikeUser result = task.get();
+                User result = task.get();
                 ArrayList<ArrayList<String>> list = result.getcheckPoints();
                 checkPoints.set(list);
             } else {
