@@ -13,6 +13,7 @@
     <string name="notification_settings">Notification Settings</string>
     <string name="description">description</string>
     <string name="groups">Groups</string>
+    <string name="logout">Log out</string>
 
     <!--Login Fragment-->
     <string name="loginPassword">Password</string>
@@ -41,4 +42,6 @@
     <string name="delete_device">Delete Device</string>
     <string name="myLocationDescription">Center device GPS location on map</string>
     <string name="yggio_id">Yggio Id</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

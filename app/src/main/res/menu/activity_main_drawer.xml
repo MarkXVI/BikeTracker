@@ -28,5 +28,11 @@
             android:id="@+id/nav_account_settings"
             android:icon="@drawable/ic_account_settings"
             android:title="@string/account_settings" />
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/logout"
+            android:title="@string/logout">
+
+        </item>
     </group>
 </menu>

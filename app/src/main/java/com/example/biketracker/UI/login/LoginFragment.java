@@ -18,7 +18,13 @@ import com.example.biketracker.MainActivity;
 import com.example.biketracker.R;
 import com.example.biketracker.UI.register.RegisterFragment;
 
+import java.io.BufferedInputStream;
+
+import io.realm.Realm;
+
 public class LoginFragment extends Fragment {
+
+    private Realm realm;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
