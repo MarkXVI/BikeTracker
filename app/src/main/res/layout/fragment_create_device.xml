@@ -55,8 +55,10 @@
         android:id="@+id/buttonCreateDevice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
         android:layout_marginTop="80dp"
         android:layout_marginBottom="224dp"
+
         android:text="@string/create_device"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -64,5 +66,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextCreateYggioId"
         app:layout_constraintVertical_bias="0.049" />
+
+    <Button
+        android:id="@+id/buttonCreateDeviceBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:width="130dp"
+        android:text="@string/backButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonCreateDevice" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -103,13 +103,15 @@ public class DeviceDAO extends UserDAO {
         });
     }
 
-    public void getDeviceId(String name, Consumer<AtomicReference<ObjectId>> callback) {
-        AtomicReference<ObjectId> check = new AtomicReference<>();
-        queryFilter = new Document("name", name);
+    public void getDeviceId(String name, ObjectId id, Consumer<AtomicReference<String>> callback) {
+        AtomicReference<String> check = new AtomicReference<>("Error");
+        queryFilter = new Document("_id", id);
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
                 Device result = task.get();
-                check.set(result.getId());
+                if (Objects.equals(result.getName(), name)) {
+                    check.set("Success");
+                }
             }
             callback.accept(check);
         });
@@ -139,7 +141,12 @@ public class DeviceDAO extends UserDAO {
         });
     }
 
-    // TODO: Make this functional with the project
-    public void delete() {
+    public void delete(ObjectId id, Consumer<AtomicReference<String>> callback) {
+        AtomicReference<String> check = new AtomicReference<>("Error");
+        queryFilter = new Document("_id", id);
+        mongoCollection.deleteOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) check.set("Success");
+            callback.accept(check);
+        });
     }
 }

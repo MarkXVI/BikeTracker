@@ -191,16 +191,14 @@ public class UserDAO {
         queryFilter = new Document("email", email);
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
-                Log.v("GET GROUPS", "Found a user with the email: " + email);
                 User result = task.get();
                 ArrayList<ObjectId> list = result.getGroupIds();
                 ids.set(list);
-            } else {
-                Log.e("GET GROUPS", "Failed to find a user with the email: " + email);
             }
             callback.accept(ids);
         });
     }
+
 
     public void addCheckPoint(String name, String latitude, String longitude, String email, Consumer<AtomicInteger> callback) {
         AtomicInteger check = new AtomicInteger(0);
@@ -252,6 +250,24 @@ public class UserDAO {
                 Log.e("GET CHECKPOINTS", "Failed to find a user with the email: " + email);
             }
             callback.accept(checkPoints);
+
+    public void removeGroupFromUser(String email, ObjectId groupId, Consumer<AtomicReference<String>> callback) {
+        AtomicReference<String> check = new AtomicReference<>("Error");
+        queryFilter = new Document("email", email);
+        mongoCollection.findOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) {
+                User result = task.get();
+                ArrayList<ObjectId> ids = result.getGroupIds();
+                ids.remove(groupId);
+                result.setGroupIds(ids);
+
+                Document updateDocument = new Document("$set", new Document("groupIds", ids));
+                mongoCollection.updateOne(queryFilter, updateDocument).getAsync(it -> {
+                    if (it.isSuccess()) check.set("Success");
+                    callback.accept(check);
+                });
+            }
+            callback.accept(check);
         });
     }
 }

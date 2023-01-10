@@ -101,21 +101,23 @@ public class GroupDAO {
         });
     }
 
-    // TODO: Make this functional with the project
-    public void delete() {
+    public void deleteGroup(ObjectId id, Consumer<AtomicReference<String>> callback) {
+        AtomicReference<String> check = new AtomicReference<>("Error");
+        queryFilter = new Document("_id", id);
+        mongoCollection.deleteOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) check.set("Success");
+            callback.accept(check);
+        });
     }
 
-    public void getDeviceIds(String name, Consumer<AtomicReference<ArrayList<ObjectId>>> callback) {
+    public void getDeviceIds(ObjectId id, Consumer<AtomicReference<ArrayList<ObjectId>>> callback) {
         AtomicReference<ArrayList<ObjectId>> ids = new AtomicReference<>(new ArrayList<>());
-        queryFilter = new Document("name", name);
+        queryFilter = new Document("_id", id);
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
-                Log.v("GET GROUP", "Found a group with the name: " + name);
                 Group result = task.get();
                 ArrayList<ObjectId> list = result.getDeviceIds();
                 ids.set(list);
-            } else {
-                Log.e("GET GROUP", "Failed to find a group with the name: " + name);
             }
             callback.accept(ids);
         });
@@ -151,28 +153,45 @@ public class GroupDAO {
         });
     }
 
-    public void getGroupId(String name, Consumer<AtomicReference<ObjectId>> callback) {
-        AtomicReference<ObjectId> check = new AtomicReference<>();
-        queryFilter = new Document("name", name);
+    public void getGroupId(String name, ObjectId id, Consumer<AtomicReference<String>> callback) {
+        AtomicReference<String> check = new AtomicReference<>("Error");
+        queryFilter = new Document("_id", id);
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
                 Group result = task.get();
-                check.set(result.getId());
+                if (Objects.equals(result.getName(), name)) check.set("Success");
             }
             callback.accept(check);
         });
     }
 
-    public void addDeviceToGroup(ObjectId id, String name, Consumer<AtomicInteger> callback) {
-        AtomicInteger check = new AtomicInteger(0);
-        queryFilter = new Document("name", name);
+    public void removeDeviceFromGroup(ObjectId groupId, ObjectId deviceId, Consumer<AtomicReference<String>> callback) {
+        AtomicReference<String> check = new AtomicReference<>("Error");
+        queryFilter = new Document("_id", groupId);
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
-                Log.v("ADD DEVICE TO GROUP", "Successfully found a group with the name: " + name);
-
                 Group result = task.get();
                 ArrayList<ObjectId> ids = result.getDeviceIds();
-                ids.add(id);
+                ids.remove(deviceId);
+                result.setDeviceIds(ids);
+
+                Document updateDocument = new Document("$set", new Document("deviceIds", ids));
+                mongoCollection.updateOne(queryFilter, updateDocument).getAsync(it -> {
+                    if (it.isSuccess()) check.set("Success");
+                    callback.accept(check);
+                });
+            } else callback.accept(check);
+        });
+    }
+
+    public void addDeviceToGroup(ObjectId groupId, ObjectId deviceId, Consumer<AtomicInteger> callback) {
+        AtomicInteger check = new AtomicInteger(0);
+        queryFilter = new Document("_id", groupId);
+        mongoCollection.findOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) {
+                Group result = task.get();
+                ArrayList<ObjectId> ids = result.getDeviceIds();
+                ids.add(deviceId);
                 result.setDeviceIds(ids);
 
                 Document updateDocument = new Document("$set", new Document("deviceIds", ids));
@@ -180,10 +199,7 @@ public class GroupDAO {
                     if (it.isSuccess()) check.set(1);
                     callback.accept(check);
                 });
-            } else {
-                Log.e("ADD DEVICE TO GROUP", String.valueOf(task.getError()));
-                callback.accept(check);
-            }
+            } else callback.accept(check);
         });
     }
 }

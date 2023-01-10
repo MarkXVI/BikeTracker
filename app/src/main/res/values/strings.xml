@@ -47,4 +47,5 @@
     <string name="checkpoint_name">Checkpoint Name</string>
     <string name="longitude">Longitude</string>
     <string name="create_checkpoint">Create Checkpoint</string>
+    <string name="backButton">Go Back</string>
 </resources>

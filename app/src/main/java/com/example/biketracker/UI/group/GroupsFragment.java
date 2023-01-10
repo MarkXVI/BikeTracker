@@ -39,12 +39,9 @@ public class GroupsFragment extends Fragment {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         listView.setAdapter(adapter);
 
-        Button btnCreateNewGroup = rootView.findViewById(R.id.buttonCreateANewGroup);
-
         userDAO.getGroupIds(email, list -> {
             AtomicReference<ArrayList<ObjectId>> ids = new AtomicReference<>(new ArrayList<>());
             ids.set(list.get());
-            Log.v("GET GROUPS", "List of group IDs: " + ids.get());
 
             adapter.clear();
             processIds(ids.get(), 0, groupDAO, adapter);
@@ -64,6 +61,7 @@ public class GroupsFragment extends Fragment {
                     .commit();
         });
 
+        Button btnCreateNewGroup = rootView.findViewById(R.id.buttonCreateANewGroup);
         btnCreateNewGroup.setOnClickListener(view -> {
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             fragmentManager.beginTransaction()
