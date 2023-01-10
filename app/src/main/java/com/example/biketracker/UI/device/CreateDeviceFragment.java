@@ -1,6 +1,7 @@
 package com.example.biketracker.UI.device;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,22 +40,14 @@ public class CreateDeviceFragment extends Fragment {
         deviceDAO.initialize();
 
 
-        Button btnCreateDevice = rootView.findViewById(R.id.buttonCreateANewDevice);
+        Button btnCreateDevice = rootView.findViewById(R.id.buttonCreateDevice);
         btnCreateDevice.setOnClickListener(view -> {
             EditText deviceName = rootView.findViewById(R.id.editTextCreateDeviceName);
-            if (deviceName.length() == 0) {
-                Log.e("CREATE DEVICE", "Device name can't be empty");
-                return;
-            }
-            EditText deviceID = rootView.findViewById(R.id.editTextCreateYggioId);
-            if (deviceName.length() == 0) {
-                Log.e("CREATE DEVICE", "Device name can't be empty");
-                return;
-            }
-            ObjectId id = new ObjectId();
-            Device device = new Device(id, deviceName.getText().toString(), deviceID.getText().toString());
-
-
+            if (deviceName.length() == 0) return;
+            EditText yggioId = rootView.findViewById(R.id.editTextCreateYggioId);
+            if (yggioId.length() == 0) return;
+            ObjectId deviceId = new ObjectId();
+            Device device = new Device(deviceId, deviceName.getText().toString(), yggioId.getText().toString());
             deviceDAO.create(device, check1 -> {
                 if (check1.get() == 0) return;
                 AtomicReference<ObjectId> groupId = new AtomicReference<>();
