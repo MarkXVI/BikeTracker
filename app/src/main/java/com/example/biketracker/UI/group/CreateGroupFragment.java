@@ -16,7 +16,6 @@ import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.DB.Schemas.Group;
 import com.example.biketracker.R;
-import com.example.biketracker.UI.device.DevicesFragment;
 
 import org.bson.types.ObjectId;
 
@@ -66,6 +65,16 @@ public class CreateGroupFragment extends Fragment {
 
                 });
             });
+        });
+
+        Button btnCreateGroupBack = rootView.findViewById(R.id.buttonCreateGroupBack);
+        btnCreateGroupBack.setOnClickListener(view -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerViewGroupsAndDevices, GroupsFragment.class, null)
+                    .setReorderingAllowed(true)
+                    .addToBackStack("name")
+                    .commit();
         });
         return rootView;
     }

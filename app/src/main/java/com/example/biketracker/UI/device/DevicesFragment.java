@@ -23,6 +23,7 @@ import com.example.biketracker.DB.DAOs.GroupDAO;
 import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.R;
+import com.example.biketracker.UI.group.GroupsFragment;
 
 import org.bson.types.ObjectId;
 
@@ -51,6 +52,16 @@ public class DevicesFragment extends Fragment {
         ListView listView = rootView.findViewById(R.id.listViewDevices);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         listView.setAdapter(adapter);
+
+        Button btnDevicesBack = rootView.findViewById(R.id.buttonDevicesBack);
+        btnDevicesBack.setOnClickListener(view -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerViewGroupsAndDevices, GroupsFragment.class, null)
+                    .setReorderingAllowed(true)
+                    .addToBackStack("name")
+                    .commit();
+        });
 
         groupDAO.getDeviceIds(groupName, list -> {
             AtomicReference<ArrayList<ObjectId>> ids = new AtomicReference<>(new ArrayList<>());
