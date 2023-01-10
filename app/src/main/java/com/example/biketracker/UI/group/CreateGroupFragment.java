@@ -1,7 +1,6 @@
 package com.example.biketracker.UI.group;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,34 +34,20 @@ public class CreateGroupFragment extends Fragment {
 
         Button btnCreateGroup = rootView.findViewById(R.id.buttonCreateGroup);
         btnCreateGroup.setOnClickListener(view -> {
-            EditText name = rootView.findViewById(R.id.editTextCreateGroupName);
-            if (name.length() == 0) {
-                Log.e("CREATE GROUP", "Group name can't be empty");
-                return;
-            }
-            String email = SaveSharedPreference.getEmail(getContext());
-
-            ObjectId id = new ObjectId();
-            Group group = new Group(id, name.getText().toString(), new ArrayList<>());
-
+            EditText groupName = rootView.findViewById(R.id.editTextCreateGroupName);
+            if (groupName.length() == 0) return;
+            ObjectId groupId = new ObjectId();
+            Group group = new Group(groupId, groupName.getText().toString(), new ArrayList<>());
             groupDAO.create(group, check1 -> {
-                if (check1.get() == 0) {
-                    Log.e("CREATE GROUP", "Could not create the group");
-                    return;
-                }
-                Log.v("CREATE GROUP", "Successfully created a group");
-                userDAO.addGroupToUser(id, email, check2 -> {
-                    if (check2.get() == 0) {
-                        Log.e("ADD GROUP TO USER", "Could not add the group to the user");
-                        return;
-                    }
+                if (check1.get() == 0) return;
+                userDAO.addGroupToUser(groupId, SaveSharedPreference.getEmail(getContext()), check2 -> {
+                    if (check2.get() == 0) return;
                     FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
                     fragmentManager.beginTransaction()
                             .replace(R.id.fragmentContainerViewGroupsAndDevices, GroupsFragment.class, null)
                             .setReorderingAllowed(true)
                             .addToBackStack("name")
                             .commit();
-
                 });
             });
         });
