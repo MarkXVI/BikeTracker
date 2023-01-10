@@ -2,22 +2,12 @@ package com.example.biketracker.DB;
 
 import android.util.Log;
 
-import androidx.core.util.Consumer;
-
-import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.Gson;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import okhttp3.FormBody;
-import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -32,20 +22,20 @@ public class HTTPRequest {
 
     OkHttpClient client;
 
-    public HTTPRequest () {
+    public HTTPRequest() {
 
         client = new OkHttpClient.Builder()
                 .addInterceptor(chain -> {
                     Request request = chain.request();
 
                     // print the request method, URL, and headers
-                    Log.v("HTTPRequest",request.method() + " " + request.url());
+                    Log.v("HTTPRequest", request.method() + " " + request.url());
                     if (request.headers().names().size() != 0) {
                         for (String name : request.headers().names()) {
                             Log.v("HTTPRequest", name + ": " + request.headers().get(name));
                         }
                     } else
-                        Log.v("HTTPRequest","No head...");
+                        Log.v("HTTPRequest", "No head...");
 
                     // read the request body into a string
                     if (request.body() != null) {
@@ -56,7 +46,7 @@ public class HTTPRequest {
                         // print the body
                         Log.v("HTTPRequest", bodyString);
                     } else
-                        Log.v("HTTPRequest","No body...");
+                        Log.v("HTTPRequest", "No body...");
 
                     return chain.proceed(request);
                 })

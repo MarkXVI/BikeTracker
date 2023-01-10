@@ -14,7 +14,7 @@
 
     <fragment
         android:id="@+id/nav_groups"
-        android:name="com.example.biketracker.UI.group.GroupsFragment"
+        android:name="com.example.biketracker.UI.group_and_device_fragment_manager.GroupsAndDevicesFragment"
         android:label="@string/groups"
         tools:layout="@layout/fragment_groups" />
 

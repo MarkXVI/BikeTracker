@@ -12,7 +12,7 @@ import android.widget.EditText;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.example.biketracker.DB.Connect;
+import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.MainActivity;
 import com.example.biketracker.R;
@@ -23,6 +23,10 @@ public class LoginFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
+
+        UserDAO userDAO = new UserDAO();
+        userDAO.initialize();
+
         Button btnRegister = rootView.findViewById(R.id.buttonCreateAccount);
 
         btnRegister.setOnClickListener(view -> {
@@ -38,8 +42,7 @@ public class LoginFragment extends Fragment {
         btnLogin.setOnClickListener(view -> {
             EditText email = rootView.findViewById(R.id.editTextLoginEmail);
             EditText password = rootView.findViewById(R.id.editTextLoginPassword);
-            Connect connect = new Connect();
-            connect.initialize(() -> connect.read(email.getText().toString(), password.getText().toString(), check -> {
+            userDAO.read(email.getText().toString(), password.getText().toString(), check -> {
                 switch (check.get()) {
                     case 0:
                         Log.v("LoginFragment", "Success");
@@ -57,7 +60,7 @@ public class LoginFragment extends Fragment {
                         Log.e("LoginFragment", "Error");
                         break;
                 }
-            }));
+            });
         });
         return rootView;
     }
