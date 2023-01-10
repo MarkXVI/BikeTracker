@@ -35,4 +35,5 @@
     <string name="name">Name</string>
     <string name="create_device">Create Device</string>
     <string name="myLocationDescription">Center device GPS location on map</string>
+    <string name="yggio_id">Yggio Id</string>
 </resources>

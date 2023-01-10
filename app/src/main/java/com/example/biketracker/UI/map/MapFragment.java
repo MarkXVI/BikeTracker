@@ -13,13 +13,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.biketracker.DB.HTTPRequest;
 import com.example.biketracker.MainActivity;
 import com.example.biketracker.R;
+import com.example.biketracker.UI.group.CreateDeviceFragment;
+import com.example.biketracker.UI.group.CreateGroupFragment;
 import com.example.biketracker.databinding.FragmentMapBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -85,11 +89,46 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         assert supportMapFragment != null;
         supportMapFragment.getMapAsync(this);
 
-        binding.fab.setOnClickListener(view -> {
-            Log.v(TAG, "fab CLICK");
-            Snackbar.make(view, "This is a Bike Tracker App", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+
+        final CharSequence[] items = {"Device", "Group", "Checkpoint"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Add: ");
+        builder.setItems(items, (dialog, item) -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            switch (item) {
+                case 0: {
+                    Log.i(TAG, "Add device");
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.nav_host_fragment_content_main, CreateDeviceFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .addToBackStack("name")
+                            .commit();
+                    break;
+                }
+                case 1: {
+                    Log.i(TAG, "Add Group");
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.nav_host_fragment_content_main, CreateGroupFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .addToBackStack("name")
+                            .commit();
+                    break;
+                }
+                case 2: {
+                    Log.i(TAG, "Add Checkpoint");
+                    break;
+                }
+            }
+        });
+        // PLUS
+        binding.plus.setOnClickListener(view -> {
+            Log.v(TAG, "plus CLICK");
+            AlertDialog alert = builder.create();
+            alert.show();
         });
 
+        // Focus current location
         binding.myLocation.setOnClickListener(view -> {
             Log.v(TAG, "myLocation CLICK");
             centerCurrentLocation(view);
@@ -182,6 +221,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             obj.add("151");
             checkPointLocations.add(obj);
 
+            Log.v("MapFragment onMapReady", checkPointLocations.toString());
             obj = new ArrayList<>();
             obj.add("Veberöd");
             obj.add("55.6364");
@@ -221,7 +261,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             // get the name and LatLng from the value object
             String name = list.get(0);
             LatLng latLng = new LatLng(Double.parseDouble(list.get(1)), Double.parseDouble(list.get(2)));
-            Log.v("MapFragment addToMap", "name: " + name + ", latLng: " + latLng);
+//            Log.v("MapFragment addToMap", "name: " + name + ", latLng: " + latLng);
             Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_bike);
             map.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromBitmap(getResizedBitmap(icon, 150, 150)))
@@ -239,7 +279,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             // get the name and LatLng from the value object
             String name = list.get(0);
             LatLng latLng = new LatLng(Double.parseDouble(list.get(1)), Double.parseDouble(list.get(2)));
-            Log.v("MapFragment addToMap", "name: " + name + ", latLng: " + latLng);
+//            Log.v("MapFragment addToMap", "name: " + name + ", latLng: " + latLng);
             Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_home);
             map.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromBitmap(getResizedBitmap(icon, 150, 150)))
