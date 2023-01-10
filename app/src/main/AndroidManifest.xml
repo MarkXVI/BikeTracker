@@ -18,7 +18,8 @@
         android:roundIcon="@mipmap/ic_bike_tracker_logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BikeTracker"
-        tools:targetApi="31" >
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="tiramisu" >
         <activity
             android:name=".MainActivity"
             android:exported="false">

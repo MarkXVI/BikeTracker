@@ -15,6 +15,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -23,6 +24,7 @@ import com.example.biketracker.DB.DAOs.GroupDAO;
 import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.R;
+import com.example.biketracker.UI.group.GroupsFragment;
 
 import org.bson.types.ObjectId;
 
@@ -52,26 +54,37 @@ public class DevicesFragment extends Fragment {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         listView.setAdapter(adapter);
 
-        groupDAO.getDeviceIds(groupName, list -> {
-            AtomicReference<ArrayList<ObjectId>> ids = new AtomicReference<>(new ArrayList<>());
-            ids.set(list.get());
-            Log.v("GET DEVICES", "List of device IDs: " + ids.get());
+        AtomicReference<ObjectId> groupId = new AtomicReference<>();
+        AtomicReference<ArrayList<ObjectId>> ids2 = new AtomicReference<>(new ArrayList<>());
+        userDAO.getGroupIds(SaveSharedPreference.getEmail(getContext()), ids -> {
+            for (ObjectId id : ids.get()) {
+                groupDAO.getGroupId(SaveSharedPreference.getGroupName(getContext()), id, check1 -> {
+                    Log.v("CHECK1", check1.get());
+                    if (Objects.equals(check1.get(), "Error")) return;
+                    groupId.set(id);
+                    groupDAO.getDeviceIds(groupId.get(), deviceIds -> groupDAO.getDeviceIds(groupId.get(), list -> {
+                        ids2.set(list.get());
 
-            Button btnCreateANewDevice = rootView.findViewById(R.id.buttonCreateANewDevice);
-            btnCreateANewDevice.setOnClickListener(v -> {
-                FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainerViewGroupsAndDevices, CreateDeviceFragment.class, null)
-                        .commit();
-            });
-            adapter.clear();
-            processDeviceIds(ids.get(), 0, deviceDAO, adapter);
-            adapter.notifyDataSetChanged();
+                        adapter.clear();
+                        processDeviceIds(ids2.get(), 0, deviceDAO, adapter);
+                        adapter.notifyDataSetChanged();
+                    }));
+                });
+            }
+        });
+
+        Button btnCreateANewDevice = rootView.findViewById(R.id.buttonCreateANewDevice);
+        btnCreateANewDevice.setOnClickListener(v -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerViewGroupsAndDevices, CreateDeviceFragment.class, null)
+                    .commit();
+
         });
 
         listView.setOnItemClickListener((parent, view, position, id) -> {
-            String deviceName = (String) parent.getItemAtPosition(position);
-            SaveSharedPreference.setDeviceName(getContext(), deviceName);
+            String clickedDeviceName = (String) parent.getItemAtPosition(position);
+            SaveSharedPreference.setDeviceName(getContext(), clickedDeviceName);
 
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             fragmentManager.beginTransaction()
@@ -79,16 +92,6 @@ public class DevicesFragment extends Fragment {
                     .setReorderingAllowed(true)
                     .addToBackStack("name")
                     .commit();
-        });
-
-        AtomicReference<ObjectId> groupId = new AtomicReference<>();
-        userDAO.getGroupIds(SaveSharedPreference.getEmail(getContext()), groupIds -> {
-            for (ObjectId value : groupIds.get()) {
-                groupDAO.getGroupName(value, SaveSharedPreference.getGroupName(getContext()), name -> {
-                    if (Objects.equals(name.get(), "Error")) return;
-                    groupDAO.getGroupId(name.get(), id -> groupId.set(id.get()));
-                });
-            }
         });
 
         CheckBox checkBox = rootView.findViewById(R.id.checkBoxGroupName);
@@ -128,6 +131,34 @@ public class DevicesFragment extends Fragment {
                                 .getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
             });
+        });
+
+        Button btnDeleteGroup = rootView.findViewById(R.id.buttonDeleteGroup);
+        btnDeleteGroup.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setMessage("Deleting the group will also delete all of its devices")
+                    .setTitle("Confirmation")
+                    .setPositiveButton("OK", (dialog, which) -> {
+                        userDAO.removeGroupFromUser(SaveSharedPreference.getEmail(getContext()), groupId.get(), check1 -> {
+                            if (Objects.equals(check1.get(), "Error")) return;
+                            for (ObjectId id : ids2.get())
+                                deviceDAO.delete(id, check2 -> {
+                                    if (Objects.equals(check2.get(), "Error")) return;
+                                    groupDAO.deleteGroup(groupId.get(), check3 -> {
+                                        if (Objects.equals(check3.get(), "Error")) return;
+                                        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+                                        fragmentManager.beginTransaction()
+                                                .replace(R.id.fragmentContainerViewGroupsAndDevices, GroupsFragment.class, null)
+                                                .setReorderingAllowed(true)
+                                                .addToBackStack("name")
+                                                .commit();
+
+                                    });
+                                });
+                        });
+                    }).setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+            AlertDialog dialog = builder.create();
+            dialog.show();
         });
         return rootView;
     }

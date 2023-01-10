@@ -1,4 +1,4 @@
-package com.example.biketracker.DB;
+package com.example.biketracker.DB.Schemas;
 
 import org.bson.types.ObjectId;
 
