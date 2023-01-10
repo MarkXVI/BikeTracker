@@ -19,7 +19,11 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.biketracker.DB.DAOs.DeviceDAO;
+import com.example.biketracker.DB.DAOs.GroupDAO;
+import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.DB.HTTPRequest;
+import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.MainActivity;
 import com.example.biketracker.R;
 import com.example.biketracker.UI.device.CreateDeviceFragment;
@@ -37,6 +41,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.bson.types.ObjectId;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -66,6 +71,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     ArrayList<ArrayList<String>> deviceLocations = new ArrayList<>();
     ArrayList<ArrayList<String>> checkPointLocations = new ArrayList<>();
 
+    UserDAO userDAO;
+    GroupDAO groupDAO;
+    DeviceDAO deviceDAO;
+
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         mainActivity = (MainActivity) getActivity();
@@ -73,6 +82,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         View root = binding.getRoot();
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
+        userDAO = new UserDAO();
+        userDAO.initialize();
+
+        groupDAO = new GroupDAO();
+        groupDAO.initialize();
+
+        deviceDAO = new DeviceDAO();
+        deviceDAO.initialize();
 
         mHandler = new Handler();
         mUpdateMapRunnable = () -> {
@@ -211,24 +229,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             HTTPRequest httpRequest = new HTTPRequest(requireContext());
             try {
 
+                ArrayList<ObjectId> obj = new ArrayList<>();
+                userDAO.getGroupIds(SaveSharedPreference.getEmail(getContext()), (ids) -> obj.addAll(ids.get()));
                 deviceLocations = new ArrayList<>();
-                deviceLocations.add(httpRequest.requestLocation("6038298e459b2700069d025e"));
+                deviceLocations.add(httpRequest.requestLocation(String.valueOf(obj.get(0))));
 
-                ArrayList<String> obj = new ArrayList<>();
-
-                obj.add( "Sydney");
-                obj.add("-34");
-                obj.add("151");
-                checkPointLocations.add(obj);
+//                obj.add( "Sydney");
+//                obj.add("-34");
+//                obj.add("151");
+//                checkPointLocations.add(obj);
 
                 Log.v("MapFragment onMapReady", checkPointLocations.toString());
-                obj = new ArrayList<>();
-                obj.add("Veberöd");
-                obj.add("55.6364");
-                obj.add("13.5006");
-                checkPointLocations.add(obj);
-
+//                obj = new ArrayList<>();
+//                obj.add("Veberöd");
+//                obj.add("55.6364");
+//                obj.add("13.5006");
+                userDAO.getCheckPoints(SaveSharedPreference.getEmail(getContext()), (checkpoints) -> checkPointLocations.addAll(checkpoints.get()));
                 Log.v("MapFragment onMapReady", deviceLocations.toString());
+
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
