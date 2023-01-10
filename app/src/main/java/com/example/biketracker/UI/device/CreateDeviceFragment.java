@@ -1,7 +1,6 @@
 package com.example.biketracker.UI.device;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,11 +12,15 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.biketracker.DB.DAOs.DeviceDAO;
 import com.example.biketracker.DB.DAOs.GroupDAO;
+import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.DB.Schemas.Device;
 import com.example.biketracker.R;
 
 import org.bson.types.ObjectId;
+
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class CreateDeviceFragment extends Fragment {
 
@@ -28,39 +31,39 @@ public class CreateDeviceFragment extends Fragment {
         GroupDAO groupDAO = new GroupDAO();
         groupDAO.initialize();
 
+        UserDAO userDAO = new UserDAO();
+        userDAO.initialize();
+
         DeviceDAO deviceDAO = new DeviceDAO();
         deviceDAO.initialize();
 
         Button btnCreateDevice = rootView.findViewById(R.id.buttonCreateDevice);
         btnCreateDevice.setOnClickListener(view -> {
             EditText deviceName = rootView.findViewById(R.id.editTextCreateDeviceName);
-            if (deviceName.length() == 0) {
-                Log.e("CREATE DEVICE", "Device name can't be empty");
-                return;
-            }
-            ObjectId id = new ObjectId();
-            Device device = new Device(id, deviceName.getText().toString());
-
+            if (deviceName.length() == 0) return;
+            ObjectId deviceId = new ObjectId();
+            Device device = new Device(deviceId, deviceName.getText().toString());
             deviceDAO.create(device, check1 -> {
-                if (check1.get() == 0) {
-                    Log.e("CREATE DEVICE", "Could not create the device");
-                    return;
-                }
-                Log.v("CREATE DEVICE", "Successfully created a device");
+                if (check1.get() == 0) return;
+                AtomicReference<ObjectId> groupId = new AtomicReference<>();
                 String groupName = SaveSharedPreference.getGroupName(getContext());
+                userDAO.getGroupIds(SaveSharedPreference.getEmail(getContext()), groupIds -> {
+                    for (ObjectId id : groupIds.get()) {
+                        groupDAO.getGroupId(groupName, id, check2 -> {
+                            if (Objects.equals(check2.get(), "Error")) return;
+                            groupId.set(id);
+                            groupDAO.addDeviceToGroup(groupId.get(), deviceId, check3 -> {
+                                if (check3.get() == 0) return;
+                                FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+                                fragmentManager.beginTransaction()
+                                        .replace(R.id.fragmentContainerViewGroupsAndDevices, DevicesFragment.class, null)
+                                        .setReorderingAllowed(true)
+                                        .addToBackStack("name")
+                                        .commit();
 
-                groupDAO.addDeviceToGroup(id, groupName, check2 -> {
-                    if (check2.get() == 0) {
-                        Log.e("ADD DEVICE TO GROUP", "Could not add the device to the group");
-                        return;
+                            });
+                        });
                     }
-                    FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainerViewGroupsAndDevices, DevicesFragment.class, null)
-                            .setReorderingAllowed(true)
-                            .addToBackStack("name")
-                            .commit();
-
                 });
             });
         });

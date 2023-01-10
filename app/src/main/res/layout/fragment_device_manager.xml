@@ -23,7 +23,7 @@
         android:id="@+id/buttonDeleteDevice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="300dp"
+        android:layout_marginTop="309dp"
         android:width="150dp"
         android:background="#c70000"
         android:text="@string/delete_device"
