@@ -7,7 +7,7 @@
 
     <group
         android:checkableBehavior="single"
-        android:title="@string/app_name">
+        android:title="@string/app_name" >
         <item
             android:id="@+id/nav_map"
             android:icon="@drawable/ic_map"

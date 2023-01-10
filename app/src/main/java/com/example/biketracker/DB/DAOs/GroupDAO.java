@@ -15,7 +15,7 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -40,7 +40,7 @@ public class GroupDAO {
     CodecRegistry pojoCodecRegistry;
     Document queryFilter;
 
-    public void initialize(Runnable callback) {
+    public void initialize() {
         app = new App(new AppConfiguration.Builder(AppId).build());
 
         anonymousCredentials = Credentials.anonymous();
@@ -52,7 +52,6 @@ public class GroupDAO {
             } else {
                 Log.e("Connect AUTH", it.getError().toString());
             }
-            callback.run();
         });
 
         appUser = app.currentUser();
@@ -76,7 +75,7 @@ public class GroupDAO {
         });
     }
 
-    public void getGroupName(ObjectId id, Consumer<AtomicReference<String>> callback) {
+    public void getGroupNames(ObjectId id, Consumer<AtomicReference<String>> callback) {
         AtomicReference<String> name = new AtomicReference<>();
         queryFilter = new Document("_id", id);
         mongoCollection.findOne(queryFilter).getAsync(task -> {
@@ -91,8 +90,15 @@ public class GroupDAO {
         });
     }
 
-    // TODO: Make this functional with the project
-    public void update() {
+    public void updateName(String newName, ObjectId id, Consumer<AtomicReference<String>> callback) {
+        AtomicReference<String> check = new AtomicReference<>("Error");
+        Document updateDocument = new Document("$set", new Document("name", newName));
+        queryFilter = new Document("_id", id);
+        mongoCollection.updateOne(queryFilter, updateDocument).getAsync(it -> {
+            if (it.isSuccess()) check.set("Success");
+            Log.v("GROUP NAME", newName);
+            callback.accept(check);
+        });
     }
 
     // TODO: Make this functional with the project
@@ -115,9 +121,34 @@ public class GroupDAO {
         });
     }
 
+    public void getGroupName(ObjectId id, String name, Consumer<AtomicReference<String>> callback) {
+        AtomicReference<String> check = new AtomicReference<>("Error");
+        queryFilter = new Document("_id", id);
+        mongoCollection.findOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) {
+                Group result = task.get();
+                if (Objects.equals(result.getName(), name)) {
+                    check.set(name);
+                }
+            }
+            callback.accept(check);
+        });
+    }
+
+    public void getGroupId(String name, Consumer<AtomicReference<ObjectId>> callback) {
+        AtomicReference<ObjectId> check = new AtomicReference<>();
+        queryFilter = new Document("name", name);
+        mongoCollection.findOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) {
+                Group result = task.get();
+                check.set(result.getId());
+            }
+            callback.accept(check);
+        });
+    }
+
     public void addDeviceToGroup(ObjectId id, String name, Consumer<AtomicInteger> callback) {
         AtomicInteger check = new AtomicInteger(0);
-        CountDownLatch latch = new CountDownLatch(1);
         queryFilter = new Document("name", name);
         mongoCollection.findOne(queryFilter).getAsync(task -> {
             if (task.isSuccess()) {
@@ -131,20 +162,12 @@ public class GroupDAO {
                 Document updateDocument = new Document("$set", new Document("deviceIds", ids));
                 mongoCollection.updateOne(queryFilter, updateDocument).getAsync(it -> {
                     if (it.isSuccess()) check.set(1);
-                    latch.countDown();
+                    callback.accept(check);
                 });
             } else {
                 Log.e("ADD DEVICE TO GROUP", String.valueOf(task.getError()));
-                latch.countDown();
+                callback.accept(check);
             }
         });
-        new Thread(() -> {
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            callback.accept(check);
-        }).start();
     }
 }

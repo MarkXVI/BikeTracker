@@ -20,6 +20,10 @@ public class RegisterFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_register, container, false);
+
+        UserDAO userDAO = new UserDAO();
+        userDAO.initialize();
+
         Button btnRegister = rootView.findViewById(R.id.buttonRegister);
 
         btnRegister.setOnClickListener(view -> {
@@ -27,8 +31,7 @@ public class RegisterFragment extends Fragment {
             EditText email = rootView.findViewById(R.id.editTextRegisterEmail);
             EditText password = rootView.findViewById(R.id.editTextRegisterPassword);
 
-            UserDAO userDAO = new UserDAO();
-            userDAO.initialize(() -> userDAO.read(email.getText().toString(), password.getText().toString(), check1 -> {
+            userDAO.read(email.getText().toString(), password.getText().toString(), check1 -> {
                 if (check1.get() != 1) Log.e("RegisterFragment", "Email Already Exists");
                 else {
                     userDAO.create(name.getText().toString(), email.getText().toString(), password.getText().toString(), check2 -> {
@@ -41,7 +44,7 @@ public class RegisterFragment extends Fragment {
                         }
                     });
                 }
-            }));
+            });
         });
         return rootView;
     }
