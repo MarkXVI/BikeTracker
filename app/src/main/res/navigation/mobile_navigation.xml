@@ -36,4 +36,5 @@
         android:label="@string/account_settings"
         tools:layout="@layout/fragment_settings" />
 
+
 </navigation>

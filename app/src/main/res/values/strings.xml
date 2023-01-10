@@ -13,6 +13,7 @@
     <string name="notification_settings">Notification Settings</string>
     <string name="description">description</string>
     <string name="groups">Groups</string>
+    <string name="logout">Log out</string>
 
     <!--Login Fragment-->
     <string name="loginPassword">Password</string>
@@ -41,11 +42,4 @@
     <string name="delete_device">Delete Device</string>
     <string name="myLocationDescription">Center device GPS location on map</string>
     <string name="yggio_id">Yggio Id</string>
-    <string name="create_a_new_checkpoint">Create a New Checkpoint</string>
-    <string name="delete_checkpoint">Delete Checkpoint</string>
-    <string name="latitude">Latitude</string>
-    <string name="checkpoint_name">Checkpoint Name</string>
-    <string name="longitude">Longitude</string>
-    <string name="create_checkpoint">Create Checkpoint</string>
-    <string name="backButton">Go Back</string>
 </resources>

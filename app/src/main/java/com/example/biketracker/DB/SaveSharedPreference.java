@@ -54,4 +54,12 @@ public class SaveSharedPreference {
     public static String getYggioToken(Context context) {
         return getSharedPreferences(context).getString(PREF_YGGIO_TOKEN, "");
     }
+
+    public void Clear(Context context) {
+        SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+        editor.putString(PREF_DEVICE_NAME, "");
+        editor.putString(PREF_YGGIO_TOKEN, "");
+        System.out.println(PREF_DEVICE_NAME);
+        editor.apply();
+    }
 }
