@@ -38,22 +38,23 @@ public class CreateDeviceFragment extends Fragment {
         DeviceDAO deviceDAO = new DeviceDAO();
         deviceDAO.initialize();
 
-        Button btnCreateDeviceBack = rootView.findViewById(R.id.buttonCreateDeviceBack);
-        btnCreateDeviceBack.setOnClickListener(view -> {
-            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainerViewGroupsAndDevices, DevicesFragment.class, null)
-                    .setReorderingAllowed(true)
-                    .addToBackStack("name")
-                    .commit();
-        });
 
-        Button btnCreateDevice = rootView.findViewById(R.id.buttonCreateDevice);
+        Button btnCreateDevice = rootView.findViewById(R.id.buttonCreateANewDevice);
         btnCreateDevice.setOnClickListener(view -> {
             EditText deviceName = rootView.findViewById(R.id.editTextCreateDeviceName);
-            if (deviceName.length() == 0) return;
-            ObjectId deviceId = new ObjectId();
-            Device device = new Device(deviceId, deviceName.getText().toString());
+            if (deviceName.length() == 0) {
+                Log.e("CREATE DEVICE", "Device name can't be empty");
+                return;
+            }
+            EditText deviceID = rootView.findViewById(R.id.editTextCreateYggioId);
+            if (deviceName.length() == 0) {
+                Log.e("CREATE DEVICE", "Device name can't be empty");
+                return;
+            }
+            ObjectId id = new ObjectId();
+            Device device = new Device(id, deviceName.getText().toString(), deviceID.getText().toString());
+
+
             deviceDAO.create(device, check1 -> {
                 if (check1.get() == 0) return;
                 AtomicReference<ObjectId> groupId = new AtomicReference<>();

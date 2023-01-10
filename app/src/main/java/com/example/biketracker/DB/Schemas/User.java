@@ -6,21 +6,23 @@ import java.util.ArrayList;
 
 public class User {
 
-    public ArrayList<ObjectId> groupIds = new ArrayList<>();
     private ObjectId id;
     private String name;
     private String email;
     private String password;
+    public ArrayList<ObjectId> groupIds = new ArrayList<>();
+    public ArrayList<ArrayList<String>> checkPoints = new ArrayList<>();
 
     public User() {
     }
 
-    public User(ObjectId id, String name, String email, String password, ArrayList<ObjectId> groupIds) {
+    public User(ObjectId id, String name, String email, String password, ArrayList<ObjectId> groupIds, ArrayList<ArrayList<String>> checkPoints) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.groupIds = groupIds;
+        this.checkPoints = checkPoints;
     }
 
     public ObjectId getId() {
@@ -61,5 +63,13 @@ public class User {
 
     public void setGroupIds(ArrayList<ObjectId> groupIds) {
         this.groupIds = groupIds;
+    }
+
+    public ArrayList<ArrayList<String>> getcheckPoints() {
+        return checkPoints;
+    }
+
+    public void setcheckPoints(ArrayList<ArrayList<String>> checkPoints) {
+        this.checkPoints = checkPoints;
     }
 }
