@@ -11,7 +11,7 @@ import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
 
-import com.example.biketracker.DB.Connect;
+import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.MainActivity;
 import com.example.biketracker.R;
 
@@ -20,6 +20,10 @@ public class RegisterFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_register, container, false);
+
+        UserDAO userDAO = new UserDAO();
+        userDAO.initialize();
+
         Button btnRegister = rootView.findViewById(R.id.buttonRegister);
 
         btnRegister.setOnClickListener(view -> {
@@ -27,11 +31,10 @@ public class RegisterFragment extends Fragment {
             EditText email = rootView.findViewById(R.id.editTextRegisterEmail);
             EditText password = rootView.findViewById(R.id.editTextRegisterPassword);
 
-            Connect connect = new Connect();
-            connect.initialize(() -> connect.read(email.getText().toString(), password.getText().toString(), check1 -> {
+            userDAO.read(email.getText().toString(), password.getText().toString(), check1 -> {
                 if (check1.get() != 1) Log.e("RegisterFragment", "Email Already Exists");
                 else {
-                    connect.create(name.getText().toString(), email.getText().toString(), password.getText().toString(), check2 -> {
+                    userDAO.create(name.getText().toString(), email.getText().toString(), password.getText().toString(), check2 -> {
                         if (check2.get() == 0) Log.e("RegisterFragment", "Error");
                         else {
                             Log.v("RegisterFragment", "Success");
@@ -41,7 +44,7 @@ public class RegisterFragment extends Fragment {
                         }
                     });
                 }
-            }));
+            });
         });
         return rootView;
     }
