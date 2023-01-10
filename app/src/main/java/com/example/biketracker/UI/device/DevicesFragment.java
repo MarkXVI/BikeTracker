@@ -79,6 +79,7 @@ public class DevicesFragment extends Fragment {
             fragmentManager.beginTransaction()
                     .replace(R.id.fragmentContainerViewGroupsAndDevices, CreateDeviceFragment.class, null)
                     .commit();
+
         });
 
         listView.setOnItemClickListener((parent, view, position, id) -> {

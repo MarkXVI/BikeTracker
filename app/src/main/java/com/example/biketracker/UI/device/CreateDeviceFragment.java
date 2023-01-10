@@ -16,6 +16,7 @@ import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.DB.Schemas.Device;
 import com.example.biketracker.R;
+import com.example.biketracker.UI.group.GroupsFragment;
 
 import org.bson.types.ObjectId;
 
@@ -36,6 +37,16 @@ public class CreateDeviceFragment extends Fragment {
 
         DeviceDAO deviceDAO = new DeviceDAO();
         deviceDAO.initialize();
+
+        Button btnCreateDeviceBack = rootView.findViewById(R.id.buttonCreateDeviceBack);
+        btnCreateDeviceBack.setOnClickListener(view -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerViewGroupsAndDevices, DevicesFragment.class, null)
+                    .setReorderingAllowed(true)
+                    .addToBackStack("name")
+                    .commit();
+        });
 
         Button btnCreateDevice = rootView.findViewById(R.id.buttonCreateDevice);
         btnCreateDevice.setOnClickListener(view -> {

@@ -51,6 +51,16 @@ public class CreateGroupFragment extends Fragment {
                 });
             });
         });
+
+        Button btnCreateGroupBack = rootView.findViewById(R.id.buttonCreateGroupBack);
+        btnCreateGroupBack.setOnClickListener(view -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerViewGroupsAndDevices, GroupsFragment.class, null)
+                    .setReorderingAllowed(true)
+                    .addToBackStack("name")
+                    .commit();
+        });
         return rootView;
     }
 }
