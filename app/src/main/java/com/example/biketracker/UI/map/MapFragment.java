@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -26,8 +27,10 @@ import com.example.biketracker.DB.HTTPRequest;
 import com.example.biketracker.DB.SaveSharedPreference;
 import com.example.biketracker.MainActivity;
 import com.example.biketracker.R;
+import com.example.biketracker.UI.checkpoint.CreateCheckpointFragment;
 import com.example.biketracker.UI.device.CreateDeviceFragment;
 import com.example.biketracker.UI.group.CreateGroupFragment;
+import com.example.biketracker.UI.group_and_device_fragment_manager.GroupsAndDevicesFragment;
 import com.example.biketracker.databinding.FragmentMapBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -46,6 +49,8 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -81,8 +86,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         binding = FragmentMapBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-
         userDAO = new UserDAO();
         userDAO.initialize();
 
@@ -91,6 +94,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         deviceDAO = new DeviceDAO();
         deviceDAO.initialize();
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         mHandler = new Handler();
         mUpdateMapRunnable = () -> {
@@ -107,34 +112,38 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         assert supportMapFragment != null;
         supportMapFragment.getMapAsync(this);
 
-
-        final CharSequence[] items = {"Device", "Group", "Checkpoint"};
+        final CharSequence[] items = {"Checkpoint"}; // "Device", "Group",
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Add: ");
         builder.setItems(items, (dialog, item) -> {
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             switch (item) {
+//                case 0: {
+//                    Log.i(TAG, "Add device");
+//                    fragmentManager.beginTransaction()
+//                            .replace(R.id.nav_host_fragment_content_main, CreateDeviceFragment.class, null)
+//                            .setReorderingAllowed(true)
+//                            .addToBackStack("name")
+//                            .commit();
+//                    break;
+//                }
+//                case 1: {
+//                    Log.i(TAG, "Add Group");
+//                    fragmentManager.beginTransaction()
+//                            .replace(R.id.nav_host_fragment_content_main, GroupsAndDevicesFragment.class, null)
+//                            .setReorderingAllowed(true)
+//                            .addToBackStack("name")
+//                            .commit();
+//                    break;
+//                }
                 case 0: {
-                    Log.i(TAG, "Add device");
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.nav_host_fragment_content_main, CreateDeviceFragment.class, null)
-                            .setReorderingAllowed(true)
-                            .addToBackStack("name")
-                            .commit();
-                    break;
-                }
-                case 1: {
-                    Log.i(TAG, "Add Group");
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.nav_host_fragment_content_main, CreateGroupFragment.class, null)
-                            .setReorderingAllowed(true)
-                            .addToBackStack("name")
-                            .commit();
-                    break;
-                }
-                case 2: {
                     Log.i(TAG, "Add Checkpoint");
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.nav_host_fragment_content_main, CreateCheckpointFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .addToBackStack("name")
+                            .commit();
                     break;
                 }
             }
@@ -225,43 +234,41 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
 
+        deviceLocations = new ArrayList<>();
+        ArrayList<String> yggioIds = new ArrayList<>();
+
+        HTTPRequest httpRequest = new HTTPRequest(requireContext());
         Thread thread = new Thread(() -> {
-            HTTPRequest httpRequest = new HTTPRequest(requireContext());
             try {
+                for (String id : yggioIds)
+                    deviceLocations.add(httpRequest.requestLocation(id));
 
-                ArrayList<ObjectId> obj = new ArrayList<>();
-                userDAO.getGroupIds(SaveSharedPreference.getEmail(getContext()), (ids) -> obj.addAll(ids.get()));
-                deviceLocations = new ArrayList<>();
-                deviceLocations.add(httpRequest.requestLocation(String.valueOf(obj.get(0))));
-
-//                obj.add( "Sydney");
-//                obj.add("-34");
-//                obj.add("151");
-//                checkPointLocations.add(obj);
-
-                Log.v("MapFragment onMapReady", checkPointLocations.toString());
-//                obj = new ArrayList<>();
-//                obj.add("Veberöd");
-//                obj.add("55.6364");
-//                obj.add("13.5006");
-                userDAO.getCheckPoints(SaveSharedPreference.getEmail(getContext()), (checkpoints) -> checkPointLocations.addAll(checkpoints.get()));
-                Log.v("MapFragment onMapReady", deviceLocations.toString());
-
-            } catch (IOException | JSONException e) {
+            } catch (JSONException | IOException e) {
                 e.printStackTrace();
+            } finally {
+                mainActivity.runOnUiThread(() -> {
+                    if (deviceLocations.size() != 0) {
+                        addDevicesToMap();
+                    }
+                });
             }
         });
 
-        thread.start();
+        getDeviceIds(ids -> {
+            yggioIds.addAll(ids.get());
+            thread.start();
+        });
+
         try {
             thread.join();
 
-            if (deviceLocations.size() != 0) {
-                addDevicesToMap();
-            }
-            if (checkPointLocations.size() != 0) {
-                addCheckPointsToMap();
-            }
+            checkPointLocations = new ArrayList<>();
+            userDAO.getCheckPoints(SaveSharedPreference.getEmail(getContext()), checkpoints -> {
+                checkPointLocations = checkpoints.get();
+                if (checkPointLocations.size() != 0) {
+                    addCheckPointsToMap();
+                }
+            });
 
             getLocationPermission();
             updateLocationUI();
@@ -270,6 +277,46 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+//                ArrayList<ArrayList<String>> obj = new ArrayList<>();
+//                obj.add( "Sydney");
+//                obj.add("-34");
+//                obj.add("151");
+//                checkPointLocations.add(obj);
+
+//                obj = new ArrayList<>();
+//                obj.add("Veberöd");
+//                obj.add("55.6364");
+//                obj.add("13.5006");
+//                checkPointLocations.add(obj);
+    }
+
+    private void getDeviceIds(Consumer<AtomicReference<ArrayList<String>>> callback) {
+        AtomicReference<ArrayList<String>> t = new AtomicReference<>();
+
+        ArrayList<ObjectId> groupIds = new ArrayList<>();
+        ArrayList<ObjectId> DeviceIds = new ArrayList<>();
+        ArrayList<String> yggioIds = new ArrayList<>();
+
+        userDAO.getGroupIds(SaveSharedPreference.getEmail(getContext()), groupIdList -> {
+            groupIds.addAll(groupIdList.get());
+            groupDAO.getDeviceIdsWithId(groupIds.get(0), deviceIdList -> {
+                DeviceIds.addAll(deviceIdList.get());
+                for (ObjectId id : DeviceIds) {
+                    deviceDAO.getDeviceYggioId(id, yggioId -> {
+                        yggioIds.add(yggioId.get());
+                        DeviceIds.remove(id);
+                        if ( DeviceIds.isEmpty() ) {
+                            t.set(yggioIds);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                callback.accept(t);
+                            }
+                        }
+                    });
+                }
+
+            });
+        });
     }
 
     private void addDevicesToMap() {
@@ -279,7 +326,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             // get the name and LatLng from the value object
             String name = list.get(0);
             LatLng latLng = new LatLng(Double.parseDouble(list.get(1)), Double.parseDouble(list.get(2)));
-//            Log.v("MapFragment addToMap", "name: " + name + ", latLng: " + latLng);
+            Log.v("MapFragment addToMap", "name: " + name + ", " + latLng);
             Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_bike);
             map.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromBitmap(getResizedBitmap(icon, 150, 150)))
@@ -296,7 +343,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             // get the name and LatLng from the value object
             String name = list.get(0);
             LatLng latLng = new LatLng(Double.parseDouble(list.get(1)), Double.parseDouble(list.get(2)));
-//            Log.v("MapFragment addToMap", "name: " + name + ", latLng: " + latLng);
+            Log.v("MapFragment addToMap", "name: " + name + ", " + latLng);
             Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_home);
             map.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromBitmap(getResizedBitmap(icon, 150, 150)))
@@ -304,7 +351,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     .title(name)
                     .visible(true));
         }
-
     }
 
     private Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {

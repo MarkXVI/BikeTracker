@@ -121,6 +121,22 @@ public class GroupDAO {
         });
     }
 
+    public void getDeviceIdsWithId(ObjectId id, Consumer<AtomicReference<ArrayList<ObjectId>>> callback) {
+        AtomicReference<ArrayList<ObjectId>> ids = new AtomicReference<>(new ArrayList<>());
+        queryFilter = new Document("_id", id);
+        mongoCollection.findOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) {
+                Log.v("GET GROUP", "Found a group with the id: " + id);
+                Group result = task.get();
+                ArrayList<ObjectId> list = result.getDeviceIds();
+                ids.set(list);
+            } else {
+                Log.e("GET GROUP", "Failed to find a group with the id: " + id);
+            }
+            callback.accept(ids);
+        });
+    }
+
     public void getGroupName(ObjectId id, String name, Consumer<AtomicReference<String>> callback) {
         AtomicReference<String> check = new AtomicReference<>("Error");
         queryFilter = new Document("_id", id);

@@ -115,6 +115,19 @@ public class DeviceDAO extends UserDAO {
         });
     }
 
+    public void getDeviceYggioId(ObjectId id, Consumer<AtomicReference<String>> callback) {
+        AtomicReference<String> check = new AtomicReference<>();
+        queryFilter = new Document("_id", id);
+        mongoCollection.findOne(queryFilter).getAsync(task -> {
+            if (task.isSuccess()) {
+                Log.v("FIND DEVICE", "Successfully found a device with the id: " + id);
+                Device result = task.get();
+                check.set(result.getYggio_id());
+            }
+            callback.accept(check);
+        });
+    }
+
     public void updateName(String newName, ObjectId id, Consumer<AtomicReference<String>> callback) {
         AtomicReference<String> check = new AtomicReference<>("Error");
         Document updateDocument = new Document("$set", new Document("name", newName));

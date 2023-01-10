@@ -31,14 +31,14 @@ public class CreateDeviceFragment extends Fragment {
         DeviceDAO deviceDAO = new DeviceDAO();
         deviceDAO.initialize();
 
-        Button btnCreateDevice = rootView.findViewById(R.id.buttonCreateDevice);
+        Button btnCreateDevice = rootView.findViewById(R.id.buttonCreateANewDevice);
         btnCreateDevice.setOnClickListener(view -> {
             EditText deviceName = rootView.findViewById(R.id.editTextCreateDeviceName);
             if (deviceName.length() == 0) {
                 Log.e("CREATE DEVICE", "Device name can't be empty");
                 return;
             }
-            EditText deviceID = rootView.findViewById(R.id.editTextCreateDeviceYggioId);
+            EditText deviceID = rootView.findViewById(R.id.editTextCreateYggioId);
             if (deviceName.length() == 0) {
                 Log.e("CREATE DEVICE", "Device name can't be empty");
                 return;

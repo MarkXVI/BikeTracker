@@ -9,7 +9,7 @@ import android.util.Log;
 import androidx.core.util.Consumer;
 
 import com.example.biketracker.DB.PasswordUtils;
-import com.example.biketracker.DB.User;
+import com.example.biketracker.DB.Schemas.User;
 
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
