@@ -10,10 +10,13 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.biketracker.DB.DAOs.UserDAO;
 import com.example.biketracker.MainActivity;
 import com.example.biketracker.R;
+import com.example.biketracker.UI.group.GroupsFragment;
+import com.example.biketracker.UI.login.LoginFragment;
 
 public class RegisterFragment extends Fragment {
 
@@ -46,6 +49,17 @@ public class RegisterFragment extends Fragment {
                 }
             });
         });
+
+        Button btnCreateGroupBack = rootView.findViewById(R.id.buttonRegisterGoBack);
+        btnCreateGroupBack.setOnClickListener(view -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerViewLoginActivity, LoginFragment.class, null)
+                    .setReorderingAllowed(true)
+                    .addToBackStack("name")
+                    .commit();
+        });
+
         return rootView;
     }
 }
