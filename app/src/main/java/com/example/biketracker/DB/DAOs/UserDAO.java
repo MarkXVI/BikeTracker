@@ -250,6 +250,8 @@ public class UserDAO {
                 Log.e("GET CHECKPOINTS", "Failed to find a user with the email: " + email);
             }
             callback.accept(checkPoints);
+        });
+    }
 
     public void removeGroupFromUser(String email, ObjectId groupId, Consumer<AtomicReference<String>> callback) {
         AtomicReference<String> check = new AtomicReference<>("Error");
