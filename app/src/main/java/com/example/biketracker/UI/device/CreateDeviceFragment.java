@@ -38,8 +38,13 @@ public class CreateDeviceFragment extends Fragment {
                 Log.e("CREATE DEVICE", "Device name can't be empty");
                 return;
             }
+            EditText deviceID = rootView.findViewById(R.id.editTextCreateDeviceYggioId);
+            if (deviceName.length() == 0) {
+                Log.e("CREATE DEVICE", "Device name can't be empty");
+                return;
+            }
             ObjectId id = new ObjectId();
-            Device device = new Device(id, deviceName.getText().toString());
+            Device device = new Device(id, deviceName.getText().toString(), deviceID.getText().toString());
 
             deviceDAO.create(device, check1 -> {
                 if (check1.get() == 0) {
