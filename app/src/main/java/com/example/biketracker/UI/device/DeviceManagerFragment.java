@@ -125,6 +125,17 @@ public class DeviceManagerFragment extends Fragment {
             AlertDialog dialog = builder.create();
             dialog.show();
         });
+
+        Button btnCreateGroupBack = rootView.findViewById(R.id.buttonDeviceManagerBack);
+        btnCreateGroupBack.setOnClickListener(view -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerViewGroupsAndDevices, DevicesFragment.class, null)
+                    .setReorderingAllowed(true)
+                    .addToBackStack("name")
+                    .commit();
+        });
+
         return rootView;
     }
 }

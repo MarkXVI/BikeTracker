@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -23,12 +24,13 @@
         android:id="@+id/buttonDeleteDevice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="309dp"
+        android:layout_marginTop="48dp"
         android:width="150dp"
         android:background="#c70000"
         android:text="@string/delete_device"
         android:textColor="#E0E0E0"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextDeviceName" />
 
@@ -42,5 +44,17 @@
         app:layout_constraintBottom_toBottomOf="@+id/editTextDeviceName"
         app:layout_constraintStart_toEndOf="@+id/editTextDeviceName"
         app:layout_constraintTop_toTopOf="@+id/editTextDeviceName" />
+
+    <Button
+        android:id="@+id/buttonDeviceManagerBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:width="150dp"
+        android:text="@string/backButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonDeleteDevice" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -48,4 +48,5 @@
     <string name="longitude">Longitud</string>
     <string name="create_checkpoint">Skapa en ny checkpoint</string>
     <string name="backButton">Gå tillbaka</string>
+    <string name="logout">Logga ut</string>
 </resources>
